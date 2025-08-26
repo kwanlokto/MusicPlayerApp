@@ -1,37 +1,134 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from 'react';
+import { View, Button, Text, FlatList, StyleSheet } from 'react-native';
+import Slider from '@react-native-community/slider';
+import TrackPlayer, {
+  State,
+  usePlaybackState,
+  useProgress,
+  Track,
+} from 'react-native-track-player';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+interface TrackItem {
+  id: string;
+  url: string;
+  title: string;
+  artist: string;
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+const tracks: TrackItem[] = [
+  {
+    id: '1',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    title: 'Song 1',
+    artist: 'SoundHelix',
+  },
+  {
+    id: '2',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    title: 'Song 2',
+    artist: 'SoundHelix',
+  },
+];
+
+export default function App() {
+  const playbackState = usePlaybackState();
+  const progress = useProgress();
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function setup() {
+      await TrackPlayer.setupPlayer();
+      await TrackPlayer.add(tracks as Track[]);
+
+      TrackPlayer.updateOptions({
+        stopWithApp: true,
+        capabilities: [
+          TrackPlayer.CAPABILITY_PLAY,
+          TrackPlayer.CAPABILITY_PAUSE,
+          TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
+          TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
+          TrackPlayer.CAPABILITY_STOP,
+        ],
+        compactCapabilities: [
+          TrackPlayer.CAPABILITY_PLAY,
+          TrackPlayer.CAPABILITY_PAUSE,
+        ],
+      });
+
+      const trackId = await TrackPlayer.getCurrentTrack();
+      setCurrentTrack(trackId);
+    }
+
+    setup();
+    return () => TrackPlayer.destroy();
+  }, []);
+
+  const togglePlayback = async () => {
+    const currentState = await TrackPlayer.getState();
+    if (currentState === State.Playing) {
+      await TrackPlayer.pause();
+    } else {
+      await TrackPlayer.play();
+    }
+  };
+
+  const playNext = async () => {
+    try {
+      await TrackPlayer.skipToNext();
+    } catch {
+      console.log('No next track');
+    }
+  };
+
+  const playPrevious = async () => {
+    try {
+      await TrackPlayer.skipToPrevious();
+    } catch {
+      console.log('No previous track');
+    }
+  };
+
+  const seek = async (value: number) => {
+    await TrackPlayer.seekTo(value);
+  };
 
   return (
     <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
+      <Text style={styles.title}>Music Player</Text>
+
+      <FlatList
+        data={tracks}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <Text
+            style={
+              item.id === currentTrack ? styles.currentTrack : styles.track
+            }
+          >
+            {item.title} - {item.artist}
+          </Text>
+        )}
       />
+
+      <Slider
+        style={{ width: 300, height: 40 }}
+        minimumValue={0}
+        maximumValue={progress.duration}
+        value={progress.position}
+        onSlidingComplete={seek}
+      />
+      <Text>
+        {Math.floor(progress.position)} / {Math.floor(progress.duration)} sec
+      </Text>
+
+      <View style={styles.controls}>
+        <Button title="Prev" onPress={playPrevious} />
+        <Button
+          title={playbackState === State.Playing ? 'Pause' : 'Play'}
+          onPress={togglePlayback}
+        />
+        <Button title="Next" onPress={playNext} />
+      </View>
     </View>
   );
 }
@@ -39,7 +136,22 @@ function AppContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 300,
+    marginTop: 20,
+  },
+  track: { fontSize: 16, marginVertical: 5 },
+  currentTrack: {
+    fontSize: 16,
+    marginVertical: 5,
+    fontWeight: 'bold',
+    color: 'green',
   },
 });
-
-export default App;
