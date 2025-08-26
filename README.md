@@ -4,6 +4,35 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
+## Step 0: Getting started: Install Node AND Java Development Kit
+```sh
+nvm install v24.6.0
+nvm use v24.6.0
+
+sudo apt update
+sudo apt install openjdk-17-jdk
+
+java -version
+javac -version
+echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
+echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
+source ~/.bashrc
+```
+Download and install [Android Studio](https://developer.android.com/studio)
+```sh
+cd ~/Downloads
+unzip android-studio-*.zip -d ~/android-studio
+~/android-studio/android-studio/bin/studio.sh
+
+# Add env variables
+echo "export ANDROID_HOME=$HOME/Android/Sdk" >> ~/.bashrc
+echo "export PATH=$PATH:$ANDROID_HOME/emulator" >> ~/.bashrc
+echo "export PATH=$PATH:$ANDROID_HOME/tools" >> ~/.bashrc
+echo "export PATH=$PATH:$ANDROID_HOME/tools/bin" >> ~/.bashrc
+echo "export PATH=$PATH:$ANDROID_HOME/platform-tools" >> ~/.bashrc
+source ~/.bashrc
+```
+
 ## Step 1: Start Metro
 
 First, you will need to run **Metro**, the JavaScript build tool for React Native.
@@ -30,6 +59,9 @@ npm run android
 
 # OR using Yarn
 yarn android
+
+# OR using NPX (this is what I tested on)
+npx react-native run-android
 ```
 
 ### iOS
