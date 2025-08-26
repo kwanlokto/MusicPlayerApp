@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Button, Text, FlatList, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
 import TrackPlayer, {
+  Capability,
   State,
   usePlaybackState,
   useProgress,
@@ -41,18 +42,15 @@ export default function App() {
       await TrackPlayer.add(tracks as Track[]);
 
       TrackPlayer.updateOptions({
-        stopWithApp: true,
+        alwaysPauseOnInterruption: true,
         capabilities: [
-          TrackPlayer.CAPABILITY_PLAY,
-          TrackPlayer.CAPABILITY_PAUSE,
-          TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-          TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
-          TrackPlayer.CAPABILITY_STOP,
+          Capability.Play,
+          Capability.Pause,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.Stop,
         ],
-        compactCapabilities: [
-          TrackPlayer.CAPABILITY_PLAY,
-          TrackPlayer.CAPABILITY_PAUSE,
-        ],
+        compactCapabilities: [Capability.Play, Capability.Pause],
       });
 
       const trackId = await TrackPlayer.getCurrentTrack();
@@ -60,7 +58,11 @@ export default function App() {
     }
 
     setup();
-    return () => TrackPlayer.destroy();
+    return () => {
+      TrackPlayer.reset().then(() => {
+        console.log('Player reset');
+      });
+    };
   }, []);
 
   const togglePlayback = async () => {
@@ -124,7 +126,7 @@ export default function App() {
       <View style={styles.controls}>
         <Button title="Prev" onPress={playPrevious} />
         <Button
-          title={playbackState === State.Playing ? 'Pause' : 'Play'}
+          title={playbackState.state === State.Playing ? 'Pause' : 'Play'}
           onPress={togglePlayback}
         />
         <Button title="Next" onPress={playNext} />
