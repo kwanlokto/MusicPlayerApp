@@ -1,4 +1,7 @@
 {
   "name": "MusicPlayerApp",
-  "displayName": "MusicPlayerApp"
+  "displayName": "MusicPlayerApp",
+  "plugins": [
+    "expo-audio"
+  ]
 }
