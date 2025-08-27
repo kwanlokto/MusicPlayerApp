@@ -34,7 +34,9 @@ const tracks: TrackItem[] = [
 export default function App() {
   const playbackState = usePlaybackState();
   const progress = useProgress();
-  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
+  const [currentTrackIndex, setcurrentTrackIndex] = useState<
+    number | undefined
+  >();
 
   useEffect(() => {
     async function setup() {
@@ -53,15 +55,17 @@ export default function App() {
         compactCapabilities: [Capability.Play, Capability.Pause],
       });
 
-      const trackId = await TrackPlayer.getCurrentTrack();
-      setCurrentTrack(trackId);
+      // Register the playback service
+      // TrackPlayer.registerPlaybackService(() => require('./service').default);
+
+      const trackIndex = await TrackPlayer.getActiveTrackIndex();
+      setcurrentTrackIndex(trackIndex);
     }
 
     setup();
+
     return () => {
-      TrackPlayer.reset().then(() => {
-        console.log('Player reset');
-      });
+      TrackPlayer.reset();
     };
   }, []);
 
@@ -104,11 +108,13 @@ export default function App() {
 
       <FlatList
         data={tracks}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
           <Text
             style={
-              item.id === currentTrack ? styles.currentTrack : styles.track
+              index === currentTrackIndex
+                ? styles.currentTrack
+                : styles.track
             }
           >
             {item.title} - {item.artist}
