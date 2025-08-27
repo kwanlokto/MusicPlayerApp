@@ -70,7 +70,11 @@ export default function App() {
     if (currentState === State.Playing) {
       await TrackPlayer.pause();
     } else {
-      await TrackPlayer.play();
+      try {
+        await TrackPlayer.play();
+      } catch (e) {
+        console.warn('Player not ready yet', e);
+      }
     }
   };
 
