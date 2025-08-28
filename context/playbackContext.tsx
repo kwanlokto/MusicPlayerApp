@@ -1,5 +1,16 @@
-import { Audio, AVPlaybackStatus } from 'expo-av';
-import React, { createContext, useContext, useRef, useState } from 'react';
+import {
+  Audio,
+  AVPlaybackStatus,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from 'expo-av';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 type PlaybackContextType = {
   sound: Audio.Sound | null;
@@ -10,12 +21,28 @@ type PlaybackContextType = {
   stop: () => Promise<void>;
 };
 
-const PlaybackContext = createContext<PlaybackContextType | undefined>(undefined);
+const PlaybackContext = createContext<PlaybackContextType | undefined>(
+  undefined,
+);
 
-export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [trackTitle, setTrackTitle] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const sound = useRef<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    // Initialize background audio once on mount
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      staysActiveInBackground: true, // <-- background playback
+      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+    });
+  }, []);
 
   const playTrack = async (uri: string, title: string) => {
     if (sound.current) {
@@ -48,7 +75,16 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <PlaybackContext.Provider value={{ sound: sound.current, trackTitle, isPlaying, playTrack, togglePlay, stop }}>
+    <PlaybackContext.Provider
+      value={{
+        sound: sound.current,
+        trackTitle,
+        isPlaying,
+        playTrack,
+        togglePlay,
+        stop,
+      }}
+    >
       {children}
     </PlaybackContext.Provider>
   );
