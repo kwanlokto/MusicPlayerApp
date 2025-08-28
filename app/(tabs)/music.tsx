@@ -1,5 +1,4 @@
 import { usePlayback } from '@/context/playbackContext';
-import { Audio } from 'expo-av';
 import * as MediaLibrary from 'expo-media-library';
 import React, { useEffect, useState } from 'react';
 import {
@@ -11,16 +10,12 @@ import {
 } from 'react-native';
 
 export default function MusicScreen() {
-  const { playTrack, isPlaying, togglePlay, stop } = usePlayback();
+  const { playTrack } = usePlayback();
 
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     requestPermissionAndLoad();
-    return () => {
-      if (sound) sound.unloadAsync();
-    };
   }, []);
 
   const requestPermissionAndLoad = async () => {
@@ -55,7 +50,9 @@ export default function MusicScreen() {
           data={songs}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => playTrack(item.uri, item.filename)}>
+            <TouchableOpacity
+              onPress={() => playTrack(item.uri, item.filename)}
+            >
               <Text style={styles.song}>{item.filename}</Text>
             </TouchableOpacity>
           )}
