@@ -10,6 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { capitalize } from '@/helpers';
 import { useRouter } from 'expo-router';
 
 export default function FolderListScreen() {
@@ -31,7 +32,7 @@ export default function FolderListScreen() {
     const albums = await MediaLibrary.getAlbumsAsync();
     const uniqueFolderTitles = Array.from(
       new Set(albums.map(album => album.title)),
-    );
+    ).sort((a, b) => a.localeCompare(b));
 
     setFolders(uniqueFolderTitles);
   };
@@ -45,9 +46,9 @@ export default function FolderListScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.folderItem}
-            onPress={() => router.push(`/folder/${item.split('/').pop()}`)}
+            onPress={() => router.push(`/folder/${item}`)}
           >
-            <Text style={styles.folderText}>{item.split('/').pop()}</Text>
+            <Text style={styles.folderText}>{capitalize(item)}</Text>
           </TouchableOpacity>
         )}
       />

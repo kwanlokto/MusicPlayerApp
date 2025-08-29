@@ -63,7 +63,7 @@ export default function FolderPage() {
                 {item.filename}
               </Text>
               <Text style={styles.songSubtext}>
-                {formatDuration(item.duration)}s
+                {formatDuration(item.duration)}
               </Text>
             </TouchableOpacity>
           )}

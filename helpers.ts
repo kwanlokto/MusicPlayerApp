@@ -11,3 +11,6 @@ export const formatDuration = (durationSec: number) => {
     return `${seconds}s`;
   }
 };
+
+export const capitalize = (str: string) =>
+  str.replace(/\b\w/g, char => char.toUpperCase());
