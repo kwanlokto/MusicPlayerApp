@@ -1,14 +1,16 @@
 import * as MediaLibrary from 'expo-media-library';
-import { useRouter } from 'expo-router';
+
 import { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from 'react-native';
+
+import { useRouter } from 'expo-router';
 
 export default function FolderListScreen() {
   const router = useRouter();

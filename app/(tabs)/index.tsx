@@ -1,12 +1,14 @@
-import { usePlayback } from '@/context/playbackContext';
-import React from 'react';
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from 'react-native';
+
+import { usePlayback } from '@/context/playbackContext';
+import { Ionicons } from '@expo/vector-icons'; // Expo has this built-in
+import React from 'react';
 
 export default function Index() {
   const { trackTitle, isPlaying, togglePlay, stop } = usePlayback();
@@ -24,12 +26,16 @@ export default function Index() {
       <Text style={styles.track}>{trackTitle}</Text>
 
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.button} onPress={togglePlay}>
-          <Text style={styles.buttonText}>{isPlaying ? 'Pause' : 'Play'}</Text>
+        <TouchableOpacity style={styles.iconButton} onPress={togglePlay}>
+          <Ionicons
+            name={isPlaying ? 'pause' : 'play'}
+            size={32}
+            color="#fff"
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={stop}>
-          <Text style={styles.buttonText}>Stop</Text>
+        <TouchableOpacity style={styles.iconButton} onPress={stop}>
+          <Ionicons name="stop" size={32} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -71,5 +77,13 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       color: '#fff',
       fontSize: 16,
       fontWeight: '600',
+    },
+    iconButton: {
+      backgroundColor: scheme === 'dark' ? '#1DB954' : '#007AFF',
+      padding: 16,
+      borderRadius: 50,
+      elevation: 3,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });

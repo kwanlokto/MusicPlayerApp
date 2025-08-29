@@ -1,9 +1,12 @@
 'use client';
-import { usePlayback } from '@/context/playbackContext';
+
 import * as MediaLibrary from 'expo-media-library';
-import { useLocalSearchParams } from 'expo-router';
+
 import { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+
+import { usePlayback } from '@/context/playbackContext';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams(); // folder_id from URL
