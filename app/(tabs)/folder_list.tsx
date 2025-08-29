@@ -28,18 +28,12 @@ export default function FolderListScreen() {
   };
 
   const loadSongs = async () => {
-    const media = await MediaLibrary.getAssetsAsync({
-      mediaType: MediaLibrary.MediaType.audio,
-      first: 1000,
-    });
-    const folderSet = new Set<string>();
-    media.assets.forEach(asset => {
-      if (asset.uri.startsWith('file://')) {
-        const parts = asset.uri.split('/');
-        folderSet.add(parts.slice(0, -1).join('/'));
-      }
-    });
-    setFolders(Array.from(folderSet));
+    const albums = await MediaLibrary.getAlbumsAsync();
+    const uniqueFolderTitles = Array.from(
+      new Set(albums.map(album => album.title)),
+    );
+
+    setFolders(uniqueFolderTitles);
   };
 
   return (
