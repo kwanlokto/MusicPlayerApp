@@ -10,7 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
-export default function MusicScreen() {
+export default function SongSelection() {
   const { playTrack } = usePlayback();
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
   const scheme = useColorScheme();
@@ -44,7 +44,7 @@ export default function MusicScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎵 Songs on Device</Text>
+      <Text style={styles.title}>🎵 Songs</Text>
 
       {songs.length === 0 ? (
         <Text style={styles.empty}>No songs found</Text>
