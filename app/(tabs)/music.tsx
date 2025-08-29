@@ -2,17 +2,19 @@ import { usePlayback } from '@/context/playbackContext';
 import * as MediaLibrary from 'expo-media-library';
 import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
 } from 'react-native';
 
 export default function MusicScreen() {
   const { playTrack } = usePlayback();
-
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
+  const scheme = useColorScheme();
+  const styles = getStyles(scheme);
 
   useEffect(() => {
     requestPermissionAndLoad();
@@ -31,7 +33,7 @@ export default function MusicScreen() {
     try {
       const media = await MediaLibrary.getAssetsAsync({
         mediaType: MediaLibrary.MediaType.audio,
-        first: 1000, // max number of songs to fetch
+        first: 1000,
         sortBy: [MediaLibrary.SortBy.creationTime],
       });
       setSongs(media.assets);
@@ -43,6 +45,7 @@ export default function MusicScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🎵 Songs on Device</Text>
+
       {songs.length === 0 ? (
         <Text style={styles.empty}>No songs found</Text>
       ) : (
@@ -51,6 +54,7 @@ export default function MusicScreen() {
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
+              style={styles.songItem}
               onPress={() => playTrack(item.uri, item.filename)}
             >
               <Text style={styles.song}>{item.filename}</Text>
@@ -62,25 +66,40 @@ export default function MusicScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-    padding: 20,
-    paddingTop: 50,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 22,
-    marginBottom: 20,
-  },
-  empty: {
-    color: '#888',
-    fontSize: 16,
-  },
-  song: {
-    color: '#aaa',
-    fontSize: 18,
-    marginBottom: 12,
-  },
-});
+const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
+      padding: 20,
+      paddingTop: 50,
+    },
+    title: {
+      color: scheme === 'dark' ? '#fff' : '#000',
+      fontSize: 24,
+      fontWeight: '700',
+      marginBottom: 20,
+    },
+    empty: {
+      color: scheme === 'dark' ? '#888' : '#666',
+      fontSize: 16,
+      textAlign: 'center',
+      marginTop: 40,
+    },
+    songItem: {
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+      marginBottom: 10,
+      borderRadius: 10,
+      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    song: {
+      color: scheme === 'dark' ? '#ddd' : '#333',
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
