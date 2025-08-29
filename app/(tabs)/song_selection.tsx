@@ -1,18 +1,18 @@
-import { usePlayback } from '@/context/playbackContext';
 import * as MediaLibrary from 'expo-media-library';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
   useColorScheme,
+  View,
 } from 'react-native';
 
-export default function SongSelection() {
-  const { playTrack } = usePlayback();
-  const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
+export default function FolderListScreen() {
+  const router = useRouter();
+  const [folders, setFolders] = useState<string[]>([]);
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
@@ -22,46 +22,39 @@ export default function SongSelection() {
 
   const requestPermissionAndLoad = async () => {
     const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status === 'granted') {
-      loadSongs();
-    } else {
-      console.log('Permission denied!');
-    }
+    if (status === 'granted') loadSongs();
   };
 
   const loadSongs = async () => {
-    try {
-      const media = await MediaLibrary.getAssetsAsync({
-        mediaType: MediaLibrary.MediaType.audio,
-        first: 1000,
-        sortBy: [MediaLibrary.SortBy.creationTime],
-      });
-      setSongs(media.assets);
-    } catch (error) {
-      console.log('Error fetching songs:', error);
-    }
+    const media = await MediaLibrary.getAssetsAsync({
+      mediaType: MediaLibrary.MediaType.audio,
+      first: 1000,
+    });
+    const folderSet = new Set<string>();
+    media.assets.forEach(asset => {
+      if (asset.uri.startsWith('file://')) {
+        const parts = asset.uri.split('/');
+        folderSet.add(parts.slice(0, -1).join('/'));
+      }
+    });
+    setFolders(Array.from(folderSet));
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎵 Songs</Text>
-
-      {songs.length === 0 ? (
-        <Text style={styles.empty}>No songs found</Text>
-      ) : (
-        <FlatList
-          data={songs}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.songItem}
-              onPress={() => playTrack(item.uri, item.filename)}
-            >
-              <Text style={styles.song}>{item.filename}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+      <Text style={styles.title}>📁 Music Folders</Text>
+      <FlatList
+        data={folders}
+        keyExtractor={item => item}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.folderItem}
+            onPress={() => router.push(`/folder/${item.split('/').pop()}`)}
+          >
+            <Text style={styles.folderText}>{item.split('/').pop()}</Text>
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 }
@@ -70,36 +63,25 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
       padding: 20,
       paddingTop: 50,
+      backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
     },
     title: {
-      color: scheme === 'dark' ? '#fff' : '#000',
       fontSize: 24,
       fontWeight: '700',
       marginBottom: 20,
+      color: scheme === 'dark' ? '#fff' : '#000',
     },
-    empty: {
-      color: scheme === 'dark' ? '#888' : '#666',
-      fontSize: 16,
-      textAlign: 'center',
-      marginTop: 40,
-    },
-    songItem: {
-      paddingVertical: 14,
-      paddingHorizontal: 12,
-      marginBottom: 10,
+    folderItem: {
+      padding: 16,
+      marginBottom: 12,
       borderRadius: 10,
       backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
     },
-    song: {
+    folderText: {
+      fontSize: 18,
+      fontWeight: '600',
       color: scheme === 'dark' ? '#ddd' : '#333',
-      fontSize: 16,
-      fontWeight: '500',
     },
   });
