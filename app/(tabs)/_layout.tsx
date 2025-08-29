@@ -36,7 +36,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="song_selection"
+        name="folder_list"
         options={{
           title: 'Folder',
           tabBarIcon: ({ color }) => (

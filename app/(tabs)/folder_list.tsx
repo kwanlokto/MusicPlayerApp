@@ -70,6 +70,7 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
     },
     title: {
+      marginTop: 20,
       fontSize: 24,
       fontWeight: '700',
       marginBottom: 20,
