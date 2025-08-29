@@ -10,22 +10,10 @@ export default function FolderPage() {
   const { folder_id } = useLocalSearchParams(); // folder_id from URL
   const { playTrack } = usePlayback();
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
-    requestPermission();
+    loadSongs();
   }, []);
-
-  useEffect(() => {
-    if (hasPermission) {
-      loadSongs();
-    }
-  }, [folder_id, hasPermission]);
-
-  const requestPermission = async () => {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    setHasPermission(status === 'granted');
-  };
 
   const loadSongs = async () => {
     const media = await MediaLibrary.getAssetsAsync({
@@ -34,7 +22,7 @@ export default function FolderPage() {
     });
 
     // filter songs based on folder_id
-    const songsInFolder = media.assets.filter((asset) => {
+    const songsInFolder = media.assets.filter(asset => {
       if (!asset.uri.startsWith('file://')) return false;
       const path = asset.uri.split('/').slice(-2, -1)[0]; // folder name before file
       return path === folder_id;
@@ -42,14 +30,6 @@ export default function FolderPage() {
 
     setSongs(songsInFolder);
   };
-
-  if (hasPermission === false) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Permission to access media is required.</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -60,7 +40,7 @@ export default function FolderPage() {
       ) : (
         <FlatList
           data={songs}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => playTrack(item.uri, item.filename)}
