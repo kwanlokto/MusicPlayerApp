@@ -13,10 +13,15 @@ export default function Index() {
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
-  return (
+  return !trackTitle ? (
     <View style={styles.container}>
       <Text style={styles.title}>🎶 Music Player</Text>
-      <Text style={styles.track}>{trackTitle || 'No track playing'}</Text>
+      <Text style={styles.track}>No track playing</Text>
+    </View>
+  ) : (
+    <View style={styles.container}>
+      <Text style={styles.title}>🎶 Now Playing</Text>
+      <Text style={styles.track}>{trackTitle}</Text>
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.button} onPress={togglePlay}>
