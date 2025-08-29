@@ -4,109 +4,112 @@ import {
   InterruptionModeAndroid,
   InterruptionModeIOS,
 } from 'expo-av';
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 /**
- * Represents a single audio track with a URI and title.
+ * Represents a single audio track.
  */
 type Track = {
+  /** URI of the track to play */
   uri: string;
+  /** Display title of the track */
   title: string;
+};
+
+/**
+ * Node in a doubly-linked list for playback.
+ */
+type TrackNode = {
+  /** The track stored in this node */
+  track: Track;
+  /** Next node in the list */
+  next?: TrackNode;
+  /** Previous node in the list */
+  prev?: TrackNode;
 };
 
 /**
  * Defines the shape of the PlaybackContext.
  */
 type PlaybackContextType = {
-  /** The title of the currently playing track */
+  /** Title of the currently playing track */
   trackTitle: string;
 
   /** Whether audio is currently playing */
   isPlaying: boolean;
 
-  /** Queue of tracks to be played next */
-  queue: Track[];
+  /** Current track node being played */
+  currentNode?: TrackNode;
 
   /**
-   * Plays a single track immediately.
-   * If a track is already playing, it stops it first.
-   * @param uri The URI of the track to play
-   * @param title The display title of the track
+   * Plays a single track immediately, updating currentNode.
+   * @param track Track to play
    */
-  playTrack: (uri: string, title: string) => Promise<void>;
+  playTrack: (track: Track) => Promise<void>;
 
   /**
-   * Sets the playback queue.
-   * @param tracks Array of Track objects to queue
+   * Adds multiple tracks to the playback linked list.
+   * If the list is empty, the first track becomes the head node.
+   * @param tracks Array of Track objects to enqueue
    */
-  setQueue: (tracks: Track[]) => void;
+  addToQueue: (tracks: Track[]) => void;
 
-  /**
-   * Plays the next track in the queue.
-   * If the queue is empty, stops playback.
-   */
+  /** Plays the next track in the linked list. Stops if at the end. */
   playNext: () => void;
 
-  /**
-   * Toggles playback of the current track.
-   * Pauses if playing, resumes if paused.
-   */
+  /** Plays the previous track in the linked list, if available. */
+  playPrevious: () => void;
+
+  /** Toggles play/pause of the current track. */
   togglePlay: () => Promise<void>;
 
-  /**
-   * Stops playback and clears the queue and current track.
-   */
+  /** Stops playback completely and clears the linked list. */
   stop: () => Promise<void>;
 };
 
-// Create React context for playback
-const PlaybackContext = createContext<PlaybackContextType | undefined>(
-  undefined,
-);
+/**
+ * React context for audio playback.
+ */
+const PlaybackContext = createContext<PlaybackContextType | undefined>(undefined);
 
 /**
- * Provider component that wraps the app and manages audio playback.
+ * Provider component that wraps the app and manages linked-list audio playback.
  */
-export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const sound = useRef<Audio.Sound | null>(null); // Ref to the currently playing Audio.Sound
-  const [trackTitle, setTrackTitle] = useState(''); // Current track title
+export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
+  const [trackTitle, setTrackTitle] = useState(''); // Display title of current track
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
-  const [queue, setQueueState] = useState<Track[]>([]); // Tracks queued to play next
+  const [currentNode, setCurrentNode] = useState<TrackNode | undefined>(); // Node currently playing
+  const [headNode, setHeadNode] = useState<TrackNode | undefined>(); // Head of linked list
+
+  /** Map to quickly reference nodes by track URI */
+  const trackNodeMap = new Map<string, TrackNode>();
 
   /**
-   * Configure audio mode for background playback and cleanup on unmount.
+   * Initialize audio mode for background playback and cleanup on unmount.
    */
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      staysActiveInBackground: true, // Continue playing when app is backgrounded
+      staysActiveInBackground: true,
       interruptionModeIOS: InterruptionModeIOS.DoNotMix,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
     });
 
-    // Cleanup when component unmounts
     return () => {
-      if (sound.current) {
-        sound.current.unloadAsync();
-      }
+      if (sound.current) sound.current.unloadAsync();
     };
   }, []);
 
   /**
-   * Plays a track immediately, stopping any currently playing track.
-   * Automatically triggers `playNext()` when the track finishes.
+   * Plays a single track immediately.
+   * Stops any currently playing track.
+   * Automatically sets up next track when finished.
+   * @param track Track to play
    */
-  const playTrack = async (uri: string, title: string) => {
+  const playTrack = async (track: Track) => {
     try {
       if (sound.current) {
         await sound.current.unloadAsync();
@@ -114,19 +117,18 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true },
+        { uri: track.uri },
+        { shouldPlay: true }
       );
 
       sound.current = newSound;
-      setTrackTitle(title);
+      setTrackTitle(track.title);
       setIsPlaying(true);
+      setCurrentNode(trackNodeMap.get(track.uri));
 
-      // Auto-play next track when current track finishes
+      // Automatically play next track when current finishes
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
-        if (status.isLoaded && status.didJustFinish) {
-          playNext();
-        }
+        if (status.isLoaded && status.didJustFinish) playNext();
       });
     } catch (e) {
       console.error('Error playing track:', e);
@@ -135,33 +137,50 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   /**
-   * Updates the playback queue.
+   * Adds multiple tracks to the playback linked list.
+   * Links nodes together to form a doubly-linked list.
+   * @param tracks Array of Track objects
    */
-  const setQueue = (tracks: Track[]) => {
-    setQueueState(tracks);
+  const addToQueue = (tracks: Track[]) => {
+    let prevNode: TrackNode | undefined;
+    tracks.forEach(track => {
+      const node: TrackNode = { track, prev: prevNode };
+      if (prevNode) prevNode.next = node;
+      else if (!headNode) setHeadNode(node); // Set head if list empty
+
+      prevNode = node;
+      trackNodeMap.set(track.uri, node);
+    });
   };
 
   /**
-   * Plays the next track in the queue.
-   * Clears playback if queue is empty.
+   * Plays the next track in the linked list.
+   * Stops playback if there is no next node.
    */
   const playNext = () => {
-    if (queue.length === 0) {
+    if (!currentNode?.next) {
       stop();
       return;
     }
-
-    const [nextTrack, ...rest] = queue;
-    setQueueState(rest);
-    playTrack(nextTrack.uri, nextTrack.title);
+    playTrack(currentNode.next.track);
   };
 
   /**
-   * Toggles play/pause of the current track.
+   * Plays the previous track in the linked list.
+   * Does nothing if there is no previous node.
+   */
+  const playPrevious = () => {
+    if (!currentNode?.prev) return;
+    playTrack(currentNode.prev.track);
+  };
+
+  /**
+   * Toggles playback of the current track.
+   * Pauses if playing, resumes if paused.
    */
   const togglePlay = async () => {
     if (!sound.current) return;
-    const status = (await sound.current.getStatusAsync()) as AVPlaybackStatus;
+    const status = await sound.current.getStatusAsync() as AVPlaybackStatus;
     if (!status.isLoaded) return;
 
     if (status.isPlaying) {
@@ -174,7 +193,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   /**
-   * Stops playback completely and clears the queue.
+   * Stops playback completely and clears the linked list.
    */
   const stop = async () => {
     if (!sound.current) return;
@@ -182,7 +201,9 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     await sound.current.unloadAsync();
     setIsPlaying(false);
     setTrackTitle('');
-    setQueueState([]);
+    setCurrentNode(undefined);
+    setHeadNode(undefined);
+    trackNodeMap.clear();
   };
 
   return (
@@ -190,10 +211,11 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         trackTitle,
         isPlaying,
-        queue,
+        currentNode,
         playTrack,
-        setQueue,
+        addToQueue,
         playNext,
+        playPrevious,
         togglePlay,
         stop,
       }}
@@ -204,8 +226,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 /**
- * Hook to use the playback context.
- * Throws an error if used outside of the PlaybackProvider.
+ * Hook to access the playback context.
+ * Throws an error if used outside of PlaybackProvider.
  */
 export const usePlayback = () => {
   const ctx = useContext(PlaybackContext);

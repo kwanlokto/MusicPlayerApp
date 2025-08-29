@@ -16,7 +16,7 @@ import { formatDuration } from '@/helpers';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
-  const { playTrack, setQueue, playNext } = usePlayback(); // added setQueue
+  const { playTrack, addToQueue } = usePlayback(); // added setQueue
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
@@ -24,7 +24,7 @@ export default function FolderPage() {
   const loadSongs = async () => {
     const media = await MediaLibrary.getAssetsAsync({
       mediaType: MediaLibrary.MediaType.audio,
-      first: 1000,
+      first: 1000, // capped to 1000 songs per folder
     });
 
     const songsInFolder = media.assets.filter(asset => {
@@ -45,16 +45,16 @@ export default function FolderPage() {
     if (!songs.length) return;
 
     // Create a queue of track URIs and titles
-    const queue = songs.map(song => ({
+    const trackNodes = songs.map(song => ({
       uri: song.uri,
       title: song.filename,
     }));
 
     // Send queue to playback context
-    setQueue(queue);
+    addToQueue(trackNodes);
 
     // Start playing the first track
-    playTrack(queue[0].uri, queue[0].title);
+    playTrack(trackNodes[0]);
   };
 
   return (
@@ -78,7 +78,9 @@ export default function FolderPage() {
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={() => playTrack(item.uri, item.filename)}
+                onPress={() =>
+                  playTrack({ uri: item.uri, title: item.filename })
+                }
                 style={styles.songItem}
               >
                 <Text numberOfLines={1} style={styles.songTitle}>
@@ -151,4 +153,3 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       color: scheme === 'dark' ? '#aaa' : '#555',
     },
   });
-
