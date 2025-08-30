@@ -34,10 +34,10 @@ type PlaybackContextType = {
   isPlaying: boolean;
 
   /** Current track node being played */
-  currentNode?: TrackNode;
+  currentTrackNode?: TrackNode;
 
   /**
-   * Plays a single track immediately, updating currentNode.
+   * Plays a single track immediately, updating currentTrackNode.
    * @param track Track to play
    */
   playTrack: (track: Track) => Promise<void>;
@@ -77,7 +77,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
-  const [currentNode, setCurrentNode] = useState<TrackNode | undefined>(); // Node currently playing
+  const [currentTrackNode, setcurrentTrackNode] = useState<TrackNode | undefined>(); // Node currently playing
 
   /** Map to quickly reference nodes by track URI */
   const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
@@ -120,7 +120,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       sound.current = newSound;
       setIsPlaying(true);
-      setCurrentNode(trackNodeMap.current.get(track.uri) ?? { track });
+      setcurrentTrackNode(trackNodeMap.current.get(track.uri) ?? { track });
 
       // Automatically play next track when current finishes
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
@@ -156,11 +156,11 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    * Stops playback if there is no next node.
    */
   const playNext = () => {
-    if (!currentNode?.next) {
+    if (!currentTrackNode?.next) {
       stop();
       return;
     }
-    playTrack(currentNode.next.track);
+    playTrack(currentTrackNode.next.track);
   };
 
   /**
@@ -168,8 +168,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    * Does nothing if there is no previous node.
    */
   const playPrevious = () => {
-    if (!currentNode?.prev) return;
-    playTrack(currentNode.prev.track);
+    if (!currentTrackNode?.prev) return;
+    playTrack(currentTrackNode.prev.track);
   };
 
   /**
@@ -198,7 +198,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     await sound.current.stopAsync();
     await sound.current.unloadAsync();
     setIsPlaying(false);
-    setCurrentNode(undefined);
+    setcurrentTrackNode(undefined);
     trackNodeMap.current.clear();
   };
 
@@ -206,7 +206,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     <PlaybackContext.Provider
       value={{
         isPlaying,
-        currentNode,
+        currentTrackNode,
         playTrack,
         addToQueue,
         playNext,
