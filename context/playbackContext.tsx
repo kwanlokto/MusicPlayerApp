@@ -12,15 +12,7 @@ import React, {
   useState,
 } from 'react';
 
-/**
- * Represents a single audio track.
- */
-type Track = {
-  /** URI of the track to play */
-  uri: string;
-  /** Display title of the track */
-  title: string;
-};
+import { Track } from '@/type';
 
 /**
  * Node in a doubly-linked list for playback.
@@ -86,7 +78,6 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
   const [currentNode, setCurrentNode] = useState<TrackNode | undefined>(); // Node currently playing
-  const [headNode, setHeadNode] = useState<TrackNode | undefined>(); // Head of linked list
 
   /** Map to quickly reference nodes by track URI */
   const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
@@ -148,14 +139,16 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const addToQueue = (tracks: Track[]) => {
     let prevNode: TrackNode | undefined;
+    let headNode: TrackNode | undefined
     tracks.forEach(track => {
       const node: TrackNode = { track, prev: prevNode };
       if (prevNode) prevNode.next = node;
-      else if (!headNode) setHeadNode(node); // Set head if list empty
+      else if (!headNode) headNode = node; // Set head if list empty
 
       prevNode = node;
       trackNodeMap.current.set(track.uri, node);
     });
+    if (prevNode) prevNode.next = headNode  // Create a loop
   };
 
   /**
@@ -206,7 +199,6 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     await sound.current.unloadAsync();
     setIsPlaying(false);
     setCurrentNode(undefined);
-    setHeadNode(undefined);
     trackNodeMap.current.clear();
   };
 

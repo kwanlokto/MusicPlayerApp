@@ -18,6 +18,7 @@ export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
   const { playTrack, addToQueue } = usePlayback(); // added setQueue
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
+
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
@@ -34,6 +35,17 @@ export default function FolderPage() {
     });
 
     setSongs(songsInFolder);
+
+    if (!songsInFolder.length) return;
+
+    // Create a queue of track URIs and titles
+    const tracks = songsInFolder.map(song => ({
+      uri: song.uri,
+      title: song.filename,
+    }));
+
+    // Send queue to playback context
+    addToQueue(tracks);
   };
 
   useEffect(() => {
@@ -42,19 +54,41 @@ export default function FolderPage() {
 
   // Play all songs in order
   const playAllSongs = () => {
-    if (!songs.length) return;
-
     // Create a queue of track URIs and titles
-    const trackNodes = songs.map(song => ({
+    const tracks = songs.map(song => ({
       uri: song.uri,
       title: song.filename,
     }));
 
     // Send queue to playback context
-    addToQueue(trackNodes);
-
+    addToQueue(tracks);
     // Start playing the first track
-    playTrack(trackNodes[0]);
+    playTrack(tracks[0]);
+  };
+
+  // Shuffle all songs and play the first song
+  const shuffleAll = () => {
+    // Create a shallow copy of the queue
+    const shuffledSongs = [...songs];
+
+    // Fisher–Yates shuffle
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [
+        shuffledSongs[j],
+        shuffledSongs[i],
+      ];
+    }
+
+    const tracks = shuffledSongs.map(song => ({
+      uri: song.uri,
+      title: song.filename,
+    }));
+    // Update queue in context
+    addToQueue(tracks);
+
+    // Start playback from the first track
+    playTrack(tracks[0]);
   };
 
   return (
@@ -67,9 +101,20 @@ export default function FolderPage() {
         </View>
       ) : (
         <>
-          {/* Play All button */}
-          <TouchableOpacity style={styles.playAllButton} onPress={playAllSongs}>
+          <TouchableOpacity
+            style={styles.playAllButton}
+            onPress={playAllSongs}
+            disabled={songs.length === 0}
+          >
             <Text style={styles.playAllText}>▶ Play All</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.playAllButton}
+            onPress={shuffleAll}
+            disabled={songs.length === 0}
+          >
+            <Text style={styles.playAllText}> Shuffle All </Text>
           </TouchableOpacity>
 
           <FlatList
@@ -109,7 +154,7 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       padding: 16,
     },
     playAllButton: {
-      backgroundColor: scheme === 'dark' ? '#1DB954' : '#007AFF',
+      backgroundColor: scheme === 'dark' ? '#f5f5f5' : '#121212',
       paddingVertical: 12,
       paddingHorizontal: 20,
       borderRadius: 12,

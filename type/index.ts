@@ -5,3 +5,10 @@ export type Playlist = {
   name: string;
   tracks: MediaLibrary.Asset[]; // or just store asset.id/uri
 };
+
+export type Track = {
+  /** URI of the track to play */
+  uri: string;
+  /** Display title of the track */
+  title: string;
+};
