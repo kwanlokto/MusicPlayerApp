@@ -11,11 +11,11 @@ import { Ionicons } from '@expo/vector-icons'; // Expo has this built-in
 import React from 'react';
 
 export default function Index() {
-  const { trackTitle, isPlaying, togglePlay, stop } = usePlayback();
+  const { currentNode, isPlaying, togglePlay, stop } = usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
-  return !trackTitle ? (
+  return !currentNode?.track?.title ? (
     <View style={styles.container}>
       <Text style={styles.title}>🎶 Music Player</Text>
       <Text style={styles.track}>No track playing</Text>
@@ -23,7 +23,7 @@ export default function Index() {
   ) : (
     <View style={styles.container}>
       <Text style={styles.title}>🎶 Now Playing</Text>
-      <Text style={styles.track}>{trackTitle}</Text>
+      <Text style={styles.track}>{currentNode?.track?.title}</Text>
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.iconButton} onPress={togglePlay}>

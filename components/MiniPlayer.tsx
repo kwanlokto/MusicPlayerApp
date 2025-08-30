@@ -13,18 +13,17 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
 export const MiniPlayer = () => {
-  const { trackTitle, isPlaying, togglePlay, playNext, playPrevious } =
+  const { currentNode, isPlaying, togglePlay, playNext, playPrevious } =
     usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
   // Don't render if nothing is playing
-  if (!trackTitle) return null;
 
   return (
     <View style={styles.container}>
       <Text numberOfLines={1} style={styles.title}>
-        {trackTitle}
+        {currentNode?.track?.title ?? "No track playing"}
       </Text>
 
       <View style={styles.controls}>
@@ -51,7 +50,7 @@ export const MiniPlayer = () => {
 const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
   StyleSheet.create({
     container: {
-      position: 'absolute',       // Pin to bottom
+      position: 'absolute',
       top: 48,
       left: 0,
       right: 0,

@@ -4,7 +4,13 @@ import {
   InterruptionModeAndroid,
   InterruptionModeIOS,
 } from 'expo-av';
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 /**
  * Represents a single audio track.
@@ -32,9 +38,6 @@ type TrackNode = {
  * Defines the shape of the PlaybackContext.
  */
 type PlaybackContextType = {
-  /** Title of the currently playing track */
-  trackTitle: string;
-
   /** Whether audio is currently playing */
   isPlaying: boolean;
 
@@ -70,20 +73,23 @@ type PlaybackContextType = {
 /**
  * React context for audio playback.
  */
-const PlaybackContext = createContext<PlaybackContextType | undefined>(undefined);
+const PlaybackContext = createContext<PlaybackContextType | undefined>(
+  undefined,
+);
 
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
  */
-export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
-  const [trackTitle, setTrackTitle] = useState(''); // Display title of current track
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
   const [currentNode, setCurrentNode] = useState<TrackNode | undefined>(); // Node currently playing
   const [headNode, setHeadNode] = useState<TrackNode | undefined>(); // Head of linked list
 
   /** Map to quickly reference nodes by track URI */
-  const trackNodeMap = new Map<string, TrackNode>();
+  const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
 
   /**
    * Initialize audio mode for background playback and cleanup on unmount.
@@ -118,13 +124,12 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: track.uri },
-        { shouldPlay: true }
+        { shouldPlay: true },
       );
 
       sound.current = newSound;
-      setTrackTitle(track.title);
       setIsPlaying(true);
-      setCurrentNode(trackNodeMap.get(track.uri));
+      setCurrentNode(trackNodeMap.current.get(track.uri) ?? { track });
 
       // Automatically play next track when current finishes
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
@@ -149,7 +154,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       else if (!headNode) setHeadNode(node); // Set head if list empty
 
       prevNode = node;
-      trackNodeMap.set(track.uri, node);
+      trackNodeMap.current.set(track.uri, node);
     });
   };
 
@@ -180,7 +185,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
    */
   const togglePlay = async () => {
     if (!sound.current) return;
-    const status = await sound.current.getStatusAsync() as AVPlaybackStatus;
+    const status = (await sound.current.getStatusAsync()) as AVPlaybackStatus;
     if (!status.isLoaded) return;
 
     if (status.isPlaying) {
@@ -200,16 +205,14 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await sound.current.stopAsync();
     await sound.current.unloadAsync();
     setIsPlaying(false);
-    setTrackTitle('');
     setCurrentNode(undefined);
     setHeadNode(undefined);
-    trackNodeMap.clear();
+    trackNodeMap.current.clear();
   };
 
   return (
     <PlaybackContext.Provider
       value={{
-        trackTitle,
         isPlaying,
         currentNode,
         playTrack,
