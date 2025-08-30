@@ -77,7 +77,9 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
-  const [currentTrackNode, setcurrentTrackNode] = useState<TrackNode | undefined>(); // Node currently playing
+  const [currentTrackNode, setcurrentTrackNode] = useState<
+    TrackNode | undefined
+  >(); // Node currently playing
 
   /** Map to quickly reference nodes by track URI */
   const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
@@ -108,11 +110,13 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const playTrack = async (track: Track) => {
     try {
+      // Unload previous track
       if (sound.current) {
         await sound.current.unloadAsync();
         sound.current.setOnPlaybackStatusUpdate(null);
       }
 
+      // Load and play new track
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: track.uri },
         { shouldPlay: true },
@@ -139,7 +143,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const addToQueue = (tracks: Track[]) => {
     let prevNode: TrackNode | undefined;
-    let headNode: TrackNode | undefined
+    let headNode: TrackNode | undefined;
     tracks.forEach(track => {
       const node: TrackNode = { track, prev: prevNode };
       if (prevNode) prevNode.next = node;
@@ -148,7 +152,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       prevNode = node;
       trackNodeMap.current.set(track.uri, node);
     });
-    if (prevNode) prevNode.next = headNode  // Create a loop
+    if (prevNode) prevNode.next = headNode; // Create a loop
   };
 
   /**
