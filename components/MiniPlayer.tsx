@@ -1,11 +1,11 @@
 'use client';
 
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useColorScheme,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
 } from 'react-native';
 
 import { usePlayback } from '@/context/playbackContext';
@@ -23,7 +23,7 @@ export const MiniPlayer = () => {
   return (
     <View style={styles.container}>
       <Text numberOfLines={1} style={styles.title}>
-        {currentNode?.track?.title ?? "No track playing"}
+        {currentNode?.track?.title ?? 'No track playing'}
       </Text>
 
       <View style={styles.controls}>
@@ -50,10 +50,6 @@ export const MiniPlayer = () => {
 const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
   StyleSheet.create({
     container: {
-      position: 'absolute',
-      top: 48,
-      left: 0,
-      right: 0,
       width: '100%',
       backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#007AFF',
       paddingHorizontal: 16,

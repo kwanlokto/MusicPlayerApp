@@ -5,12 +5,11 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
-import { Stack, useSegments } from 'expo-router';
 
-import { MiniPlayer } from '@/components/MiniPlayer';
 import { PlaybackProvider } from '@/context/playbackContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
@@ -19,14 +18,10 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  const segments = useSegments(); // current route segments
 
   if (!loaded) return null;
 
-  // Define pages where MiniPlayer should appear
-  const showMiniPlayer =
-    segments[0] === 'folder' ||
-    (segments[0] === '(tabs)' && segments[1] === 'folder_list');
+
 
   return (
     <PlaybackProvider>
@@ -35,7 +30,6 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
-        {showMiniPlayer && <MiniPlayer />}
         <StatusBar style="auto" />
       </ThemeProvider>
     </PlaybackProvider>
