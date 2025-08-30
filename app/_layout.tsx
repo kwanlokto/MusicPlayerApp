@@ -6,6 +6,7 @@ import {
   ThemeProvider,
 } from '@react-navigation/native';
 
+import { MiniPlayer } from '@/components/MiniPlayer';
 import { PlaybackProvider } from '@/context/playbackContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFonts } from 'expo-font';
@@ -26,6 +27,7 @@ export default function RootLayout() {
   return (
     <PlaybackProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <MiniPlayer />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
