@@ -1,5 +1,6 @@
 import * as MediaLibrary from 'expo-media-library';
 
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -101,22 +102,38 @@ export default function FolderPage() {
         </View>
       ) : (
         <>
-          <TouchableOpacity
-            style={styles.playAllButton}
-            onPress={playAllSongs}
-            disabled={songs.length === 0}
-          >
-            <Text style={styles.playAllText}>▶ Play All</Text>
-          </TouchableOpacity>
+          {/* Play / Shuffle buttons */}
+          <View style={styles.playControls}>
+            {/* Play All */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.primaryButton]}
+              onPress={playAllSongs}
+            >
+              <Ionicons
+                name="play-circle"
+                size={24}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.playButtonText}>Play All</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.playAllButton}
-            onPress={shuffleAll}
-            disabled={songs.length === 0}
-          >
-            <Text style={styles.playAllText}> Shuffle All </Text>
-          </TouchableOpacity>
+            {/* Shuffle All */}
+            <TouchableOpacity
+              style={[styles.actionButton, styles.secondaryButton]}
+              onPress={shuffleAll}
+            >
+              <MaterialIcons
+                name="shuffle"
+                size={24}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.playButtonText}>Shuffle All</Text>
+            </TouchableOpacity>
+          </View>
 
+          {/* Song list */}
           <FlatList
             data={songs}
             keyExtractor={item => item.id}
@@ -148,44 +165,65 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
+      backgroundColor: scheme === 'dark' ? '#121212' : '#fff',
     },
     listContent: {
-      padding: 16,
+      paddingHorizontal: 16,
+      paddingBottom: 8,
     },
-    playAllButton: {
-      backgroundColor: scheme === 'dark' ? '#f5f5f5' : '#121212',
+    playControls: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      width: '100%', // make container span full width
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       paddingVertical: 12,
       paddingHorizontal: 20,
-      borderRadius: 12,
-      alignItems: 'center',
-      marginHorizontal: 16,
-      marginBottom: 12,
+      borderRadius: 24,
+      width: '47.5%',
     },
-    playAllText: {
-      color: '#fff',
+    primaryButton: {
+      backgroundColor: '#1DB954', // YouTube Music uses bright green-ish accent
+    },
+    secondaryButton: {
+      backgroundColor: scheme === 'dark' ? '#2a2a2a' : '#f0f0f0',
+    },
+    playButtonText: {
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
+      color: '#fff',
+    },
+    secondaryButtonText: {
+      color: scheme === 'dark' ? '#fff' : '#222',
     },
     songItem: {
       backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
-      padding: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
       borderRadius: 12,
       marginBottom: 12,
-      elevation: 2,
+      // flexDirection: 'row',
+      // justifyContent: 'space-between',
+      // alignItems: 'center',
       shadowColor: '#000',
       shadowOpacity: 0.05,
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
     },
     songTitle: {
       fontSize: 16,
       fontWeight: '600',
       color: scheme === 'dark' ? '#fff' : '#222',
+      flexShrink: 1,
     },
     songSubtext: {
       fontSize: 12,
-      marginTop: 4,
       color: scheme === 'dark' ? '#aaa' : '#555',
     },
     emptyContainer: {

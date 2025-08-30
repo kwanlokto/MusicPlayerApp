@@ -13,7 +13,7 @@ export default function FolderStackLayout() {
     <View style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="[id]" />
+        <Stack.Screen name="[folder_id]" />
       </Stack>
       {showMiniPlayer && <MiniPlayer />}
     </View>
