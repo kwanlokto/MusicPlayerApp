@@ -100,8 +100,23 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       // Restore track
       const savedTrack = await AsyncStorage.getItem('currentTrackNode');
       if (savedTrack) {
-        const track = JSON.parse(savedTrack);
-        setCurrentTrackNode({ track });
+        const track: Track = JSON.parse(savedTrack);
+
+        // Ensure it's added back into the queue (so linked list works)
+        if (!trackNodeMap.current.has(track.uri)) {
+          addToQueue([track]);
+        }
+
+        // Recreate node reference
+        const node = trackNodeMap.current.get(track.uri);
+        setCurrentTrackNode(node);
+
+        // 🔥 Reload audio, but paused by default
+        const { sound: restoredSound } = await Audio.Sound.createAsync(
+          { uri: track.uri },
+          { shouldPlay: false },
+        );
+        sound.current = restoredSound;
       }
 
       // Restore queue
