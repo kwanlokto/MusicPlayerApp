@@ -6,12 +6,19 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { usePlayback } from '@/context/playbackContext';
 import { Ionicons } from '@expo/vector-icons'; // Expo has this built-in
 import React from 'react';
+import { usePlayback } from '@/context/playbackContext';
 
 export default function Index() {
-  const { currentTrackNode, isPlaying, togglePlay, stop } = usePlayback();
+  const {
+    currentTrackNode,
+    isPlaying,
+    togglePlay,
+    playNext,
+    playPrevious,
+    stop,
+  } = usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
@@ -26,16 +33,28 @@ export default function Index() {
       <Text style={styles.track}>{currentTrackNode?.track?.title}</Text>
 
       <View style={styles.controls}>
+        {/* Previous Button */}
+        <TouchableOpacity style={styles.iconButton} onPress={playPrevious}>
+          <Ionicons name="play-skip-back" size={40} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Play / Pause */}
         <TouchableOpacity style={styles.iconButton} onPress={togglePlay}>
           <Ionicons
             name={isPlaying ? 'pause' : 'play'}
-            size={32}
+            size={40}
             color="#fff"
           />
         </TouchableOpacity>
 
+        {/* Stop */}
         <TouchableOpacity style={styles.iconButton} onPress={stop}>
-          <Ionicons name="stop" size={32} color="#fff" />
+          <Ionicons name="stop" size={40} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Next Button */}
+        <TouchableOpacity style={styles.iconButton} onPress={playNext}>
+          <Ionicons name="play-skip-forward" size={40} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
