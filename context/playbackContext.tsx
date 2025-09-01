@@ -77,7 +77,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
-  const [currentTrackNode, setcurrentTrackNode] = useState<
+  const [currentTrackNode, setCurrentTrackNode] = useState<
     TrackNode | undefined
   >(); // Node currently playing
 
@@ -110,8 +110,12 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const playTrack = async (track: Track) => {
     try {
-      // Unload previous track
+      // Find the node immediately (don’t wait for React state)
+      const node = trackNodeMap.current.get(track.uri);
+
+      // Unload previous track safely
       if (sound.current) {
+        await sound.current.stopAsync();
         await sound.current.unloadAsync();
         sound.current.setOnPlaybackStatusUpdate(null);
       }
@@ -124,13 +128,16 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       sound.current = newSound;
       setIsPlaying(true);
-      setcurrentTrackNode(trackNodeMap.current.get(track.uri) ?? { track });
+      setCurrentTrackNode(node); // React state, async
 
-      // Automatically play next track when current finishes
+      // Handle completion
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
         if (status.isLoaded && status.didJustFinish) {
-          console.log("PLAY NEXT")
-          playNext();
+          if (node?.next) {
+            playTrack(node.next.track); // use linked list directly
+          } else {
+            stop();
+          }
         }
       });
     } catch (e) {
@@ -150,8 +157,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     tracks.forEach(track => {
       const node: TrackNode = { track, prev: prevNode };
       if (prevNode) prevNode.next = node;
-      else if (!headNode) headNode = node; // Set head if list empty
-
+      else headNode = node; // Set head if list empty
       prevNode = node;
       trackNodeMap.current.set(track.uri, node);
     });
@@ -164,7 +170,6 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const playNext = () => {
     if (!currentTrackNode?.next) {
-      console.log(currentTrackNode)
       stop();
       return;
     }
@@ -206,7 +211,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     await sound.current.stopAsync();
     await sound.current.unloadAsync();
     setIsPlaying(false);
-    setcurrentTrackNode(undefined);
+    setCurrentTrackNode(undefined);
     // trackNodeMap.current.clear();
   };
 
