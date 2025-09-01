@@ -12,6 +12,7 @@ import React, {
   useState,
 } from 'react';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Track } from '@/type';
 
 /**
@@ -84,23 +85,55 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   /** Map to quickly reference nodes by track URI */
   const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
 
-  /**
-   * Initialize audio mode for background playback and cleanup on unmount.
-   */
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      staysActiveInBackground: true,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-    });
+    // Setup audio + restore persisted state
+    (async () => {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+      });
 
+      // Restore track
+      const savedTrack = await AsyncStorage.getItem('currentTrackNode');
+      if (savedTrack) {
+        const track = JSON.parse(savedTrack);
+        setCurrentTrackNode({ track });
+      }
+
+      // Restore queue
+      const savedQueue = await AsyncStorage.getItem('trackQueue');
+      if (savedQueue) {
+        const tracks: Track[] = JSON.parse(savedQueue);
+        addToQueue(tracks);
+      }
+    })();
+
+    // Cleanup
     return () => {
       if (sound.current) sound.current.unloadAsync();
     };
   }, []);
+
+  // Persist track + queue whenever current changes
+  useEffect(() => {
+    if (!currentTrackNode) return;
+
+    const persistState = async () => {
+      await AsyncStorage.setItem(
+        'currentTrackNode',
+        JSON.stringify(currentTrackNode.track),
+      );
+
+      const queue = Array.from(trackNodeMap.current.values()).map(n => n.track);
+      await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
+    };
+
+    persistState();
+  }, [currentTrackNode]);
 
   /**
    * Plays a single track immediately.
