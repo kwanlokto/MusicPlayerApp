@@ -143,7 +143,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         JSON.stringify(currentTrackNode.track),
       );
 
-      const queue = Array.from(trackNodeMap.current.values()).map(n => n.track);
+      const queue: Track[] = Array.from(trackNodeMap.current.values()).map(n => n.track);
       await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
     };
 
