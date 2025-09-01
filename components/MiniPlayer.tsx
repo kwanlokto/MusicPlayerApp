@@ -8,17 +8,15 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { usePlayback } from '@/context/playbackContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { usePlayback } from '@/context/playbackContext';
 
 export const MiniPlayer = () => {
   const { currentTrackNode, isPlaying, togglePlay, playNext, playPrevious } =
     usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
-
-  // Don't render if nothing is playing
 
   return (
     <View style={styles.container}>

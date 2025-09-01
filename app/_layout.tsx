@@ -18,10 +18,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-
   if (!loaded) return null;
-
-
 
   return (
     <PlaybackProvider>
