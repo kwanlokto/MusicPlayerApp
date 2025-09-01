@@ -1,8 +1,5 @@
 import * as MediaLibrary from 'expo-media-library';
 
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -11,9 +8,12 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 
-import { usePlayback } from '@/context/playbackContext';
 import { formatDuration } from '@/helpers';
+import { usePlayback } from '@/context/playbackContext';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
@@ -36,17 +36,6 @@ export default function FolderPage() {
     });
 
     setSongs(songsInFolder);
-
-    if (!songsInFolder.length) return;
-
-    // Create a queue of track URIs and titles
-    const tracks = songsInFolder.map(song => ({
-      uri: song.uri,
-      title: song.filename,
-    }));
-
-    // Send queue to playback context
-    addToQueue(tracks);
   };
 
   useEffect(() => {
@@ -54,7 +43,9 @@ export default function FolderPage() {
   }, []);
 
   // Play all songs in order
-  const playAllSongs = () => {
+  const __playTrack = (index: number) => {
+    if (!songs.length) return;
+
     // Create a queue of track URIs and titles
     const tracks = songs.map(song => ({
       uri: song.uri,
@@ -64,11 +55,13 @@ export default function FolderPage() {
     // Send queue to playback context
     addToQueue(tracks);
     // Start playing the first track
-    playTrack(tracks[0]);
+    playTrack(tracks[index]);
   };
 
   // Shuffle all songs and play the first song
   const shuffleAll = () => {
+    if (!songs.length) return;
+
     // Create a shallow copy of the queue
     const shuffledSongs = [...songs];
 
@@ -107,7 +100,7 @@ export default function FolderPage() {
             {/* Play All */}
             <TouchableOpacity
               style={[styles.actionButton, styles.primaryButton]}
-              onPress={playAllSongs}
+              onPress={() => __playTrack(0)}
             >
               <Ionicons
                 name="play-circle"
@@ -138,10 +131,10 @@ export default function FolderPage() {
             data={songs}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <TouchableOpacity
                 onPress={() =>
-                  playTrack({ uri: item.uri, title: item.filename })
+                  __playTrack(index)
                 }
                 style={styles.songItem}
               >

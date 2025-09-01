@@ -128,7 +128,10 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Automatically play next track when current finishes
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
-        if (status.isLoaded && status.didJustFinish) playNext();
+        if (status.isLoaded && status.didJustFinish) {
+          console.log("PLAY NEXT")
+          playNext();
+        }
       });
     } catch (e) {
       console.error('Error playing track:', e);
@@ -161,6 +164,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const playNext = () => {
     if (!currentTrackNode?.next) {
+      console.log(currentTrackNode)
       stop();
       return;
     }
@@ -195,7 +199,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   /**
-   * Stops playback completely and clears the linked list.
+   * Stops playback completely
    */
   const stop = async () => {
     if (!sound.current) return;
@@ -203,7 +207,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     await sound.current.unloadAsync();
     setIsPlaying(false);
     setcurrentTrackNode(undefined);
-    trackNodeMap.current.clear();
+    // trackNodeMap.current.clear();
   };
 
   return (
