@@ -12,8 +12,8 @@ import React, {
   useState,
 } from 'react';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Track } from '@/type';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Node in a doubly-linked list for playback.
@@ -87,7 +87,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // Setup audio + restore persisted state
-    (async () => {
+    const loadState = async () => {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: true,
@@ -97,15 +97,17 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
       });
 
+      // Restore queue
+      const savedQueue = await AsyncStorage.getItem('trackQueue');
+      if (savedQueue) {
+        const tracks: Track[] = JSON.parse(savedQueue);
+        addToQueue(tracks);
+      }
+
       // Restore track
-      const savedTrack = await AsyncStorage.getItem('currentTrackNode');
+      const savedTrack = await AsyncStorage.getItem('currentTrack');
       if (savedTrack) {
         const track: Track = JSON.parse(savedTrack);
-
-        // Ensure it's added back into the queue (so linked list works)
-        if (!trackNodeMap.current.has(track.uri)) {
-          addToQueue([track]);
-        }
 
         // Recreate node reference
         const node = trackNodeMap.current.get(track.uri);
@@ -118,14 +120,9 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         );
         sound.current = restoredSound;
       }
+    };
 
-      // Restore queue
-      const savedQueue = await AsyncStorage.getItem('trackQueue');
-      if (savedQueue) {
-        const tracks: Track[] = JSON.parse(savedQueue);
-        addToQueue(tracks);
-      }
-    })();
+    loadState();
 
     // Cleanup
     return () => {
@@ -138,12 +135,18 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!currentTrackNode) return;
 
     const persistState = async () => {
+      if (!currentTrackNode) return;
       await AsyncStorage.setItem(
-        'currentTrackNode',
+        'currentTrack',
         JSON.stringify(currentTrackNode.track),
       );
-
-      const queue: Track[] = Array.from(trackNodeMap.current.values()).map(n => n.track);
+      // Convert linked list to ordered array
+      const queue: Track[] = [];
+      let node: TrackNode | undefined = currentTrackNode;
+      while (node && node?.next?.track.uri !== currentTrackNode.track.uri) {
+        queue.push(node.track);
+        node = node.next;
+      }
       await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
     };
 
