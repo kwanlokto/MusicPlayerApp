@@ -6,57 +6,64 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { Ionicons } from '@expo/vector-icons'; // Expo has this built-in
-import React from 'react';
 import { usePlayback } from '@/context/playbackContext';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
 
 export default function Index() {
-  const {
-    currentTrackNode,
-    isPlaying,
-    togglePlay,
-    playNext,
-    playPrevious,
-    stop,
-  } = usePlayback();
+  const { currentTrackNode, isPlaying, togglePlay, playNext, playPrevious } =
+    usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme);
 
-  return !currentTrackNode?.track?.title ? (
+  return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎶 Music Player</Text>
-      <Text style={styles.track}>No track playing</Text>
-    </View>
-  ) : (
-    <View style={styles.container}>
-      <Text style={styles.title}>🎶 Now Playing</Text>
-      <Text style={styles.track}>{currentTrackNode?.track?.title}</Text>
+      {!currentTrackNode?.track?.title ? (
+        <View style={styles.container}>
+          <Text style={styles.title}>🎶 Music Player</Text>
+          <Text style={styles.track}>No track playing</Text>
+        </View>
+      ) : (
+        <View style={styles.card}>
+          {/* <Image source={{ uri: albumArt }} style={styles.albumArt} /> */}
+          <View style={styles.cdContainer}>
+            <View style={styles.outerDisc}>
+              <View style={styles.innerHole}></View>
+            </View>
+          </View>
+          <Text style={styles.title}>{currentTrackNode.track.title}</Text>
+          <Text style={styles.artist}>
+            Unknown Artist
+          </Text>
 
-      <View style={styles.controls}>
-        {/* Previous Button */}
-        <TouchableOpacity style={styles.iconButton} onPress={playPrevious}>
-          <Ionicons name="play-skip-back" size={40} color="#fff" />
-        </TouchableOpacity>
+          {/* Progress Bar */}
+          <View style={styles.progressContainer}>
+            <View style={styles.progress}></View>
+          </View>
 
-        {/* Play / Pause */}
-        <TouchableOpacity style={styles.iconButton} onPress={togglePlay}>
-          <Ionicons
-            name={isPlaying ? 'pause' : 'play'}
-            size={40}
-            color="#fff"
-          />
-        </TouchableOpacity>
+          {/* Controls */}
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={playPrevious}
+              style={styles.controlButton}
+            >
+              <Ionicons name="play-skip-back" size={36} color="#fff" />
+            </TouchableOpacity>
 
-        {/* Stop */}
-        <TouchableOpacity style={styles.iconButton} onPress={stop}>
-          <Ionicons name="stop" size={40} color="#fff" />
-        </TouchableOpacity>
+            <TouchableOpacity onPress={togglePlay} style={styles.playButton}>
+              <Ionicons
+                name={isPlaying ? 'pause' : 'play'}
+                size={40}
+                color="#fff"
+              />
+            </TouchableOpacity>
 
-        {/* Next Button */}
-        <TouchableOpacity style={styles.iconButton} onPress={playNext}>
-          <Ionicons name="play-skip-forward" size={40} color="#fff" />
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity onPress={playNext} style={styles.controlButton}>
+              <Ionicons name="play-skip-forward" size={36} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -70,39 +77,103 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       justifyContent: 'center',
       padding: 20,
     },
-    title: {
-      color: scheme === 'dark' ? '#fff' : '#000',
-      fontSize: 28,
-      fontWeight: '700',
+    card: {
+      width: '100%',
+      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
+      borderRadius: 20,
+      padding: 20,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5,
+    },
+    albumArt: {
+      width: 250,
+      height: 250,
+      borderRadius: 20,
       marginBottom: 20,
+    },
+    title: {
+      marginTop: 24,
+      fontSize: 24,
+      fontWeight: '700',
+      color: scheme === 'dark' ? '#fff' : '#000',
+      textAlign: 'center',
+    },
+    artist: {
+      fontSize: 16,
+      color: scheme === 'dark' ? '#bbb' : '#555',
+      marginBottom: 20,
+      textAlign: 'center',
     },
     track: {
       color: scheme === 'dark' ? '#bbb' : '#333',
       fontSize: 18,
       marginBottom: 40,
     },
+    progressContainer: {
+      width: '80%',
+      height: 4,
+      backgroundColor: scheme === 'dark' ? '#333' : '#ccc',
+      borderRadius: 2,
+      marginBottom: 30,
+    },
+    progress: {
+      width: '40%', // you can tie this to actual playback progress
+      height: '100%',
+      backgroundColor: '#1DB954',
+      borderRadius: 2,
+    },
     controls: {
       flexDirection: 'row',
-      gap: 20,
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      width: '80%',
     },
-    button: {
-      backgroundColor: scheme === 'dark' ? '#1DB954' : '#007AFF',
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 12,
-      elevation: 3,
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    iconButton: {
-      backgroundColor: scheme === 'dark' ? '#1DB954' : '#007AFF',
-      padding: 16,
+    controlButton: {
+      backgroundColor: '#1DB954',
+      padding: 14,
       borderRadius: 50,
-      elevation: 3,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    playButton: {
+      backgroundColor: '#1DB954',
+      padding: 22,
+      borderRadius: 50,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 20,
+    },
+    cdContainer: {
+      marginBottom: 20,
+    },
+    outerDisc: {
+      width: 250,
+      height: 250,
+      borderRadius: 125,
+      backgroundColor: '#ccc', // disc color
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5,
+    },
+    innerHole: {
+      width: 80,
+      height: 80,
+      borderRadius: 45,
+      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    placeholderLetter: {
+      fontSize: 32,
+      fontWeight: '700',
+      color: '#000',
     },
   });
