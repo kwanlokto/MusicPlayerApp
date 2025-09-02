@@ -32,9 +32,7 @@ export default function Index() {
             </View>
           </View>
           <Text style={styles.title}>{currentTrackNode.track.title}</Text>
-          <Text style={styles.artist}>
-            Unknown Artist
-          </Text>
+          <Text style={styles.artist}>Unknown Artist</Text>
 
           {/* Progress Bar */}
           <View style={styles.progressContainer}>
@@ -154,12 +152,12 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       width: 250,
       height: 250,
       borderRadius: 125,
-      backgroundColor: '#ccc', // disc color
       alignItems: 'center',
       justifyContent: 'center',
+      backgroundColor: scheme === 'dark' ? '#333' : '#ccc',
+      shadowOpacity: scheme === 'dark' ? 0.1 : 0.3,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
       shadowRadius: 6,
       elevation: 5,
     },
