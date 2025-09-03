@@ -8,15 +8,16 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { Colors } from '@/constants/Colors';
+import { usePlayback } from '@/context/playbackContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { usePlayback } from '@/context/playbackContext';
 
 export const MiniPlayer = () => {
   const { currentTrackNode, isPlaying, togglePlay, playNext, playPrevious } =
     usePlayback();
   const scheme = useColorScheme();
-  const styles = getStyles(scheme);
+  const styles = getStyles(scheme ?? 'dark');
 
   return (
     <View style={styles.container}>
@@ -26,30 +27,30 @@ export const MiniPlayer = () => {
 
       <View style={styles.controls}>
         <TouchableOpacity onPress={playPrevious} style={styles.button}>
-          <Ionicons name="play-skip-back" size={24} color="#fff" />
+          <Ionicons name="play-skip-back" size={24} color={Colors[scheme ?? 'dark'].text} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={togglePlay} style={styles.button}>
           <Ionicons
             name={isPlaying ? 'pause' : 'play'}
             size={24}
-            color="#fff"
+            color={Colors[scheme ?? 'dark'].text}
           />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={playNext} style={styles.button}>
-          <Ionicons name="play-skip-forward" size={24} color="#fff" />
+          <Ionicons name="play-skip-forward" size={24} color={Colors[scheme ?? 'dark'].text} />
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
+const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
       width: '100%',
-      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#007AFF',
+      backgroundColor: Colors[scheme].background,
       paddingHorizontal: 16,
       paddingVertical: 12,
       flexDirection: 'row',
@@ -64,7 +65,7 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
     },
     title: {
       flex: 1,
-      color: '#fff',
+      color: Colors[scheme].text,
       fontSize: 16,
       fontWeight: '600',
       marginRight: 12,

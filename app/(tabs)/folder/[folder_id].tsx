@@ -1,5 +1,9 @@
 import * as MediaLibrary from 'expo-media-library';
 
+import { Colors, primaryButton } from '@/constants/Colors';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,12 +12,9 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 
-import { formatDuration } from '@/helpers';
 import { usePlayback } from '@/context/playbackContext';
+import { formatDuration } from '@/helpers';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
@@ -21,7 +22,7 @@ export default function FolderPage() {
   const [songs, setSongs] = useState<MediaLibrary.Asset[]>([]);
 
   const scheme = useColorScheme();
-  const styles = getStyles(scheme);
+  const styles = getStyles(scheme ?? 'dark');
 
   const loadSongs = async () => {
     const media = await MediaLibrary.getAssetsAsync({
@@ -99,7 +100,7 @@ export default function FolderPage() {
           <View style={styles.playControls}>
             {/* Play All */}
             <TouchableOpacity
-              style={[styles.actionButton, styles.primaryButton]}
+              style={[styles.actionButton, primaryButton[scheme ?? 'dark']]}
               onPress={() => __playTrack(0)}
             >
               <Ionicons
@@ -154,11 +155,11 @@ export default function FolderPage() {
 }
 
 // Add styles for Play All button
-const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
+const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: scheme === 'dark' ? '#121212' : '#fff',
+      backgroundColor: Colors[scheme].background,
     },
     listContent: {
       paddingHorizontal: 16,
@@ -180,11 +181,8 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       borderRadius: 24,
       width: '47.5%',
     },
-    primaryButton: {
-      backgroundColor: '#1DB954', // YouTube Music uses bright green-ish accent
-    },
     secondaryButton: {
-      backgroundColor: scheme === 'dark' ? '#2a2a2a' : '#f0f0f0',
+      backgroundColor: Colors[scheme].secondaryButtonBg,
     },
     playButtonText: {
       fontSize: 16,
@@ -192,17 +190,14 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
       color: '#fff',
     },
     secondaryButtonText: {
-      color: scheme === 'dark' ? '#fff' : '#222',
+      color: Colors[scheme].subText,
     },
     songItem: {
-      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
+      backgroundColor: Colors[scheme].card,
       paddingVertical: 16,
       paddingHorizontal: 20,
       borderRadius: 12,
       marginBottom: 12,
-      // flexDirection: 'row',
-      // justifyContent: 'space-between',
-      // alignItems: 'center',
       shadowColor: '#000',
       shadowOpacity: 0.05,
       shadowRadius: 4,
@@ -212,12 +207,12 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
     songTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: scheme === 'dark' ? '#fff' : '#222',
+      color: Colors[scheme].text,
       flexShrink: 1,
     },
     songSubtext: {
       fontSize: 12,
-      color: scheme === 'dark' ? '#aaa' : '#555',
+      color: Colors[scheme].subText,
     },
     emptyContainer: {
       flex: 1,
@@ -226,6 +221,6 @@ const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
     },
     emptyText: {
       fontSize: 16,
-      color: scheme === 'dark' ? '#aaa' : '#555',
+      color: Colors[scheme].subText,
     },
   });

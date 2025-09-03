@@ -10,6 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { Colors } from '@/constants/Colors';
 import { capitalize } from '@/helpers';
 import { useRouter } from 'expo-router';
 
@@ -17,7 +18,7 @@ export default function FolderListScreen() {
   const router = useRouter();
   const [folders, setFolders] = useState<string[]>([]);
   const scheme = useColorScheme();
-  const styles = getStyles(scheme);
+  const styles = getStyles(scheme ?? 'dark');
 
   useEffect(() => {
     requestPermissionAndLoad();
@@ -56,30 +57,30 @@ export default function FolderListScreen() {
   );
 }
 
-const getStyles = (scheme: 'light' | 'dark' | null | undefined) =>
+const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
       paddingTop: 50,
-      backgroundColor: scheme === 'dark' ? '#121212' : '#f5f5f5',
+      backgroundColor: Colors[scheme].background,
     },
     title: {
       marginTop: 20,
       fontSize: 24,
       fontWeight: '700',
       marginBottom: 20,
-      color: scheme === 'dark' ? '#fff' : '#000',
+      color: Colors[scheme].text,
     },
     folderItem: {
       padding: 16,
       marginBottom: 12,
       borderRadius: 10,
-      backgroundColor: scheme === 'dark' ? '#1e1e1e' : '#fff',
+      backgroundColor: Colors[scheme].card,
     },
     folderText: {
       fontSize: 18,
       fontWeight: '600',
-      color: scheme === 'dark' ? '#ddd' : '#333',
+      color: Colors[scheme].text,
     },
   });

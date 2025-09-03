@@ -2,25 +2,86 @@
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
+type ButtonStyle = {
+  backgroundColor: string;
+  alignItems: 'center';
+  justifyContent: 'center';
+};
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+// export const Colors = {
+//   light: {
+//     text: '#11181C',
+//     background: '#fff',
+//     tint: tintColorLight,
+//     icon: '#687076',
+//     tabIconDefault: '#687076',
+//     tabIconSelected: tintColorLight,
+//   },
+//   dark: {
+//     text: '#ECEDEE',
+//     background: '#151718',
+//     tint: tintColorDark,
+//     icon: '#9BA1A6',
+//     tabIconDefault: '#9BA1A6',
+//     tabIconSelected: tintColorDark,
+//   },
+// };
+
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    background: '#f5f5f5',
     tint: tintColorLight,
     icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    card: '#fff',
+    text: '#000',
+    subText: '#555',
+    track: '#333',
+    progressBg: '#ccc',
+    disc: '#ccc',
+    primaryButtonText: '#ffffff',
+    secondaryButtonText: '#000000',
+    secondaryButtonBg: '#f0f0f0',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    background: '#121212',
     tint: tintColorDark,
     icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    card: '#1e1e1e',
+    text: '#ddd',
+    subText: '#aaa',
+    track: '#bbb',
+    progressBg: '#333',
+    disc: '#333',
+    primaryButtonText: '#000000',
+    secondaryButtonText: '#ffffff',
+    secondaryButtonBg: '#2a2a2a',
   },
+};
+
+export const primaryButton: Record<'light' | 'dark', ButtonStyle> = {
+  light: {
+    backgroundColor: '#303030', // light gray surface (like YT Music cards)
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dark: {
+    backgroundColor: '#F1F1F1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+};
+
+const shadow = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowRadius: 6,
+  elevation: 5,
+};
+
+const center = {
+  alignItems: 'center',
+  justifyContent: 'center',
 };
