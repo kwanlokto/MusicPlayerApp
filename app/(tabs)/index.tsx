@@ -1,5 +1,4 @@
 import { Colors, primaryButton } from '@/constants/Colors';
-import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import { usePlayback } from '@/context/playbackContext';
 import { formatTime } from '@/helpers';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
+import React from 'react';
 
 export default function Index() {
   const {
@@ -46,7 +46,7 @@ export default function Index() {
           </View>
 
           <View
-            style={{ marginBottom: 20, alignItems: 'center', width: '90%' }}
+            style={{ marginBottom: '10%', alignItems: 'center', width: '90%' }}
           >
             <Text style={styles.title}>{currentTrackNode.track.title}</Text>
             <Text style={styles.artist}>Unknown Artist</Text>
@@ -142,7 +142,7 @@ const getStyles = (scheme: 'light' | 'dark') =>
       borderRadius: 20,
       padding: 85,
       alignItems: 'center',
-      marginTop: '40%',
+      marginTop: '30%',
     },
     card: {
       display: 'flex',
@@ -160,7 +160,7 @@ const getStyles = (scheme: 'light' | 'dark') =>
     artist: {
       fontSize: 16,
       color: Colors[scheme].subText,
-      marginBottom: 40,
+      marginBottom: 56,
       textAlign: 'center',
     },
     track: {
