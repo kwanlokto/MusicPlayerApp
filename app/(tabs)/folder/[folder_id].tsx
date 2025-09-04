@@ -96,37 +96,52 @@ export default function FolderPage() {
         </View>
       ) : (
         <>
-          {/* Play / Shuffle buttons */}
+          {/* Play / Shuffle controls */}
           <View style={styles.playControls}>
-            {/* Play All */}
             <TouchableOpacity
               style={[styles.actionButton, primaryButton[scheme ?? 'dark']]}
               onPress={() => __playTrack(0)}
             >
               <Ionicons
                 name="play-circle"
-                size={24}
+                size={28}
                 color={Colors[scheme ?? 'dark'].primaryButtonText}
-                style={{ marginRight: 8 }}
+                style={{ marginRight: 12 }}
               />
-              <Text style={styles.playButtonText}>Play All</Text>
+              <Text
+                style={[
+                  styles.actionText,
+                  { color: Colors[scheme ?? 'dark'].primaryButtonText },
+                ]}
+              >
+                Play all
+              </Text>
             </TouchableOpacity>
 
-            {/* Shuffle All */}
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                { backgroundColor: Colors[scheme ?? 'dark'].secondaryButtonBg },
+                {
+                  borderWidth: 1,
+                  borderColor: Colors[scheme ?? 'dark'].secondaryButtonText,
+                },
               ]}
               onPress={shuffleAll}
             >
               <MaterialIcons
                 name="shuffle"
-                size={24}
+                size={26}
                 color={Colors[scheme ?? 'dark'].secondaryButtonText}
-                style={{ marginRight: 8 }}
+                style={{ marginRight: 12 }}
               />
-              <Text style={styles.shuffleButtonText}>Shuffle All</Text>
+              <Text
+                style={[
+                  styles.actionText,
+                  { color: Colors[scheme ?? 'dark'].secondaryButtonText },
+                ]}
+              >
+                Shuffle
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -138,16 +153,19 @@ export default function FolderPage() {
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 onPress={() => __playTrack(index)}
-                style={styles.songItem}
+                style={styles.songRow}
               >
-                <Text numberOfLines={1} style={styles.songTitle}>
-                  {item.filename}
-                </Text>
-                <Text style={styles.songSubtext}>
-                  {formatDuration(item.duration)}
-                </Text>
+                <View style={styles.songInfo}>
+                  <Text numberOfLines={1} style={styles.songTitle}>
+                    {item.filename}
+                  </Text>
+                  <Text style={styles.songSubtext}>
+                    {formatDuration(item.duration)}
+                  </Text>
+                </View>
               </TouchableOpacity>
             )}
+            ItemSeparatorComponent={() => <View style={styles.divider} />}
           />
         </>
       )}
@@ -155,64 +173,11 @@ export default function FolderPage() {
   );
 }
 
-// Add styles for Play All button
 const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: Colors[scheme].background,
-    },
-    listContent: {
-      paddingHorizontal: 16,
-      paddingBottom: 8,
-    },
-    playControls: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingHorizontal: 32,
-      paddingVertical: 12,
-      width: '100%', // make container span full width
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 24,
-      width: '47.5%',
-    },
-    playButtonText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: Colors[scheme ?? 'dark'].primaryButtonText,
-    },
-    shuffleButtonText: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: Colors[scheme ?? 'dark'].secondaryButtonText,
-    },
-    songItem: {
-      backgroundColor: Colors[scheme].card,
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderRadius: 12,
-      marginBottom: 12,
-      shadowColor: '#000',
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
-    },
-    songTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: Colors[scheme].text,
-      flexShrink: 1,
-    },
-    songSubtext: {
-      fontSize: 12,
-      color: Colors[scheme].subText,
     },
     emptyContainer: {
       flex: 1,
@@ -221,6 +186,55 @@ const getStyles = (scheme: 'light' | 'dark') =>
     },
     emptyText: {
       fontSize: 16,
+      color: Colors[scheme].primaryButtonText,
+    },
+    playControls: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: Colors[scheme].border, // subtle divider
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      borderRadius: 24,
+      width: '45%',
+    },
+    actionText: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    listContent: {
+      paddingVertical: 8,
+    },
+    songRow: {
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    songInfo: {
+      flex: 1,
+    },
+    songTitle: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: Colors[scheme].text,
+    },
+    songSubtext: {
+      fontSize: 13,
       color: Colors[scheme].subText,
+      marginTop: 2,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: scheme === 'dark' ? '#2A2A2A' : '#E5E5E5',
+      marginLeft: 20, // aligns under text, not icons
     },
   });
