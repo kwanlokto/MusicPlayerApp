@@ -201,6 +201,13 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  /**
+   * Callback invoked by `Audio.Sound` whenever the playback status changes.
+   * Updates the current track's playback position and duration, and handles track completion.
+   *
+   * @param status - The current playback status provided by `expo-av`.
+   * @param node - The current `TrackNode` being played in the linked list.
+   */
   const onPlaybackStatusUpdate = (
     status: AVPlaybackStatus,
     node: TrackNode | undefined,
