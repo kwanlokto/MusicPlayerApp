@@ -39,11 +39,11 @@ export const Colors = {
     text: '#000',
     subText: '#555',
     track: '#333',
-    progressBg: '#ccc',
     disc: '#ccc',
     primaryButtonText: '#ffffff',
     secondaryButtonText: '#000000',
     secondaryButtonBg: '#f0f0f0',
+    progressBg: '#000000',
   },
   dark: {
     background: '#121212',
@@ -53,11 +53,11 @@ export const Colors = {
     text: '#ddd',
     subText: '#aaa',
     track: '#bbb',
-    progressBg: '#333',
     disc: '#333',
     primaryButtonText: '#000000',
     secondaryButtonText: '#ffffff',
     secondaryButtonBg: '#2a2a2a',
+    progressBg: '#ffffff',
   },
 };
 

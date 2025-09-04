@@ -59,9 +59,9 @@ export default function Index() {
               onSlidingComplete={(value: number) => {
                 handleSlidingComplete(value);
               }}
-              minimumTrackTintColor="#ffffff"
+              minimumTrackTintColor={Colors[scheme ?? 'dark'].progressBg}
               maximumTrackTintColor="#666"
-              thumbTintColor="#ffffff"
+              thumbTintColor={Colors[scheme ?? 'dark'].progressBg}
               style={{ width: '100%' }}
             />
             <View
