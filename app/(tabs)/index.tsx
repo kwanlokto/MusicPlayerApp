@@ -1,5 +1,5 @@
 import { Colors, primaryButton } from '@/constants/Colors';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -24,7 +24,6 @@ export default function Index() {
     playPrevious,
     handleSlidingComplete,
   } = usePlayback();
-  const [seekPosition, setSeekPosition] = useState(0);
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
 
@@ -40,7 +39,9 @@ export default function Index() {
           {/* <Image source={{ uri: albumArt }} style={styles.albumArt} /> */}
           <View style={styles.cdContainer}>
             <View style={styles.outerDisc}>
-              <View style={styles.innerHole}></View>
+              <View style={styles.middleDisc}>
+                <View style={styles.innerDisc}></View>
+              </View>
             </View>
           </View>
 
@@ -55,9 +56,6 @@ export default function Index() {
               minimumValue={0}
               maximumValue={duration}
               value={position}
-              onValueChange={val => {
-                setSeekPosition(val);
-              }}
               onSlidingComplete={(value: number) => {
                 handleSlidingComplete(value);
               }}
@@ -140,9 +138,9 @@ const getStyles = (scheme: 'light' | 'dark') =>
       padding: 20,
     },
     cdContainer: {
-      backgroundColor: Colors[scheme].card,
+      backgroundColor: Colors[scheme].disc,
       borderRadius: 20,
-      padding: 40,
+      padding: 85,
       alignItems: 'center',
       marginTop: '40%',
     },
@@ -150,15 +148,8 @@ const getStyles = (scheme: 'light' | 'dark') =>
       display: 'flex',
       width: '100%',
       height: '100%',
-      borderRadius: 20,
       alignItems: 'center',
       justifyContent: 'space-between',
-    },
-    albumArt: {
-      width: 250,
-      height: 250,
-      borderRadius: 20,
-      marginBottom: 20,
     },
     title: {
       fontSize: 24,
@@ -177,19 +168,6 @@ const getStyles = (scheme: 'light' | 'dark') =>
       fontSize: 18,
       marginBottom: 40,
     },
-    progressContainer: {
-      width: '100%',
-      height: 4,
-      backgroundColor: Colors[scheme].progressBg,
-      borderRadius: 2,
-      marginBottom: 24,
-    },
-    progress: {
-      width: '40%', // you can tie this to actual playback progress
-      height: '100%',
-      backgroundColor: '#ffffff',
-      borderRadius: 2,
-    },
     controls: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -206,22 +184,25 @@ const getStyles = (scheme: 'light' | 'dark') =>
       marginHorizontal: 20,
     },
     outerDisc: {
-      width: 250,
-      height: 250,
-      borderRadius: 125,
+      width: 180,
+      height: 180,
+      borderRadius: 90,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors[scheme].card,
+    },
+    middleDisc: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: Colors[scheme].disc,
-      shadowOpacity: scheme === 'dark' ? 0.1 : 0.3,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowRadius: 6,
-      elevation: 5,
     },
-    innerHole: {
-      width: 80,
-      height: 80,
-      borderRadius: 45,
+    innerDisc: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
       backgroundColor: Colors[scheme].card,
       alignItems: 'center',
       justifyContent: 'center',
