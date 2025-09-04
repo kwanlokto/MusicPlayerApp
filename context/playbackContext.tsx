@@ -62,6 +62,8 @@ type PlaybackContextType = {
   /** Plays the previous track in the linked list, if available. */
   playPrevious: () => void;
 
+  handleSlidingComplete: () => void;
+
   /** Toggles play/pause of the current track. */
   togglePlay: () => Promise<void>;
 
@@ -264,6 +266,11 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     playTrack(currentTrackNode.prev.track);
   };
 
+  const handleSlidingComplete = async (value: number) => {
+    if (!sound.current) return;
+    await sound.current.setPositionAsync(value);
+  };
+
   /**
    * Toggles playback of the current track.
    * Pauses if playing, resumes if paused.
@@ -305,6 +312,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         addToQueue,
         playNext,
         playPrevious,
+        handleSlidingComplete,
         togglePlay,
         stop,
       }}

@@ -1,5 +1,5 @@
 import { Colors, primaryButton } from '@/constants/Colors';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 
 import { usePlayback } from '@/context/playbackContext';
+import { formatTime } from '@/helpers';
 import { Ionicons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 
 export default function Index() {
   const {
@@ -20,12 +22,12 @@ export default function Index() {
     togglePlay,
     playNext,
     playPrevious,
+    handleSlidingComplete,
   } = usePlayback();
+  const [seekPosition, setSeekPosition] = useState(0);
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
-  const progress = duration > 0 ? position / duration : 0;
-  useEffect(() => {console.log(progress)}, [progress])
-  
+
   return (
     <View style={styles.container}>
       {!currentTrackNode?.track?.title ? (
@@ -49,8 +51,34 @@ export default function Index() {
             <Text style={styles.artist}>Unknown Artist</Text>
 
             {/* Progress Bar */}
-            <View style={styles.progressContainer}>
-              <View style={[styles.progress, { width: `${progress * 100}%` }]} />
+            <Slider
+              minimumValue={0}
+              maximumValue={duration}
+              value={position}
+              onValueChange={val => {
+                setSeekPosition(val);
+              }}
+              onSlidingComplete={(value: number) => {
+                handleSlidingComplete(value);
+              }}
+              minimumTrackTintColor="#ffffff"
+              maximumTrackTintColor="#666"
+              thumbTintColor="#ffffff"
+              style={{ width: '100%' }}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
+                {formatTime(position)}
+              </Text>
+              <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
+                {formatTime(duration)}
+              </Text>
             </View>
 
             {/* Controls */}
