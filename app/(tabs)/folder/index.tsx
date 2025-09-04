@@ -40,18 +40,21 @@ export default function FolderListScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📁 Music Folders</Text>
+      <Text style={styles.title}>Music folders</Text>
       <FlatList
         data={folders}
         keyExtractor={item => item}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.folderItem}
+            style={styles.row}
             onPress={() => router.push(`/folder/${item}`)}
           >
-            <Text style={styles.folderText}>{capitalize(item)}</Text>
+            <Text style={styles.folderText} numberOfLines={1}>
+              {capitalize(item)}
+            </Text>
           </TouchableOpacity>
         )}
+        ItemSeparatorComponent={() => <View style={styles.divider} />}
       />
     </View>
   );
@@ -61,26 +64,28 @@ const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
       flex: 1,
-      padding: 20,
-      paddingTop: 50,
       backgroundColor: Colors[scheme].background,
+      paddingTop: 65,
     },
     title: {
-      marginTop: 20,
-      fontSize: 24,
+      fontSize: 22,
       fontWeight: '700',
-      marginBottom: 20,
+      marginBottom: 16,
+      paddingHorizontal: 20,
       color: Colors[scheme].text,
     },
-    folderItem: {
-      padding: 16,
-      marginBottom: 12,
-      borderRadius: 10,
-      backgroundColor: Colors[scheme].card,
+    row: {
+      paddingVertical: 16,
+      paddingHorizontal: 20,
     },
     folderText: {
-      fontSize: 18,
-      fontWeight: '600',
+      fontSize: 16,
+      fontWeight: '500',
       color: Colors[scheme].text,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: Colors[scheme].border,
+      marginLeft: 20, // aligns divider with text
     },
   });

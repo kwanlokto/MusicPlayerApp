@@ -44,6 +44,7 @@ export const Colors = {
     secondaryButtonText: '#000000',
     secondaryButtonBg: '#f0f0f0',
     progressBg: '#000000',
+    border: '#E5E5E5',
   },
   dark: {
     background: '#121212',
@@ -58,6 +59,7 @@ export const Colors = {
     secondaryButtonText: '#ffffff',
     secondaryButtonBg: '#2a2a2a',
     progressBg: '#ffffff',
+    border: '#2A2A2A',
   },
 };
 
