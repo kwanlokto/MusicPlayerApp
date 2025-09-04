@@ -62,7 +62,7 @@ type PlaybackContextType = {
   /** Plays the previous track in the linked list, if available. */
   playPrevious: () => void;
 
-  handleSlidingComplete: () => void;
+  handleSlidingComplete: (value: number) => void;
 
   /** Toggles play/pause of the current track. */
   togglePlay: () => Promise<void>;
