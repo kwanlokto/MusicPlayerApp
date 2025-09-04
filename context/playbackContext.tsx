@@ -34,6 +34,12 @@ type PlaybackContextType = {
   /** Whether audio is currently playing */
   isPlaying: boolean;
 
+  /** Total duration of the current track, in milliseconds */
+  duration: number;
+
+  /** Current playback position within the track, in milliseconds */
+  position: number;
+
   /** Current track node being played */
   currentTrackNode?: TrackNode;
 
@@ -78,6 +84,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
   const [currentTrackNode, setCurrentTrackNode] = useState<
     TrackNode | undefined
   >(); // Node currently playing
@@ -113,12 +121,14 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         const node = trackNodeMap.current.get(track.uri);
         setCurrentTrackNode(node);
 
-        // 🔥 Reload audio, but paused by default
         const { sound: restoredSound } = await Audio.Sound.createAsync(
           { uri: track.uri },
           { shouldPlay: false },
         );
         sound.current = restoredSound;
+        sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+          onPlaybackStatusUpdate(status, node),
+        );
       }
     };
 
@@ -182,18 +192,29 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       setCurrentTrackNode(node); // React state, async
 
       // Handle completion
-      sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
-        if (status.isLoaded && status.didJustFinish) {
-          if (node?.next) {
-            playTrack(node.next.track); // use linked list directly
-          } else {
-            stop();
-          }
-        }
-      });
+      sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+        onPlaybackStatusUpdate(status, node),
+      );
     } catch (e) {
       console.error('Error playing track:', e);
       setIsPlaying(false);
+    }
+  };
+
+  const onPlaybackStatusUpdate = (
+    status: AVPlaybackStatus,
+    node: TrackNode | undefined,
+  ) => {
+    if (!status.isLoaded) return;
+    setDuration(status.durationMillis ?? 0);
+    setPosition(status.positionMillis ?? 0);
+
+    if (status.isLoaded && status.didJustFinish) {
+      if (node?.next) {
+        playTrack(node.next.track); // use linked list directly
+      } else {
+        stop();
+      }
     }
   };
 
@@ -270,6 +291,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     <PlaybackContext.Provider
       value={{
         isPlaying,
+        position,
+        duration,
         currentTrackNode,
         playTrack,
         addToQueue,
