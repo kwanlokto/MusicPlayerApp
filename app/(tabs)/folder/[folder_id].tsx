@@ -106,7 +106,7 @@ export default function FolderPage() {
               <Ionicons
                 name="play-circle"
                 size={24}
-                color="#fff"
+                color={Colors[scheme ?? 'dark'].primaryButtonText}
                 style={{ marginRight: 8 }}
               />
               <Text style={styles.playButtonText}>Play All</Text>
@@ -114,16 +114,19 @@ export default function FolderPage() {
 
             {/* Shuffle All */}
             <TouchableOpacity
-              style={[styles.actionButton, styles.secondaryButton]}
+              style={[
+                styles.actionButton,
+                { backgroundColor: Colors[scheme ?? 'dark'].secondaryButtonBg },
+              ]}
               onPress={shuffleAll}
             >
               <MaterialIcons
                 name="shuffle"
                 size={24}
-                color="#fff"
+                color={Colors[scheme ?? 'dark'].secondaryButtonText}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.playButtonText}>Shuffle All</Text>
+              <Text style={styles.shuffleButtonText}>Shuffle All</Text>
             </TouchableOpacity>
           </View>
 
@@ -134,9 +137,7 @@ export default function FolderPage() {
             contentContainerStyle={styles.listContent}
             renderItem={({ item, index }) => (
               <TouchableOpacity
-                onPress={() =>
-                  __playTrack(index)
-                }
+                onPress={() => __playTrack(index)}
                 style={styles.songItem}
               >
                 <Text numberOfLines={1} style={styles.songTitle}>
@@ -181,16 +182,15 @@ const getStyles = (scheme: 'light' | 'dark') =>
       borderRadius: 24,
       width: '47.5%',
     },
-    secondaryButton: {
-      backgroundColor: Colors[scheme].secondaryButtonBg,
-    },
     playButtonText: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#fff',
+      color: Colors[scheme ?? 'dark'].primaryButtonText,
     },
-    secondaryButtonText: {
-      color: Colors[scheme].subText,
+    shuffleButtonText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: Colors[scheme ?? 'dark'].secondaryButtonText,
     },
     songItem: {
       backgroundColor: Colors[scheme].card,
