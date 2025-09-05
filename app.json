@@ -18,6 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "permissions": ["WAKE_LOCK"],
       "package": "com.kwanlokto.MusicPlayerApp"
     },
     "web": {

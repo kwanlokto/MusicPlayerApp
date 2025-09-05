@@ -101,12 +101,12 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
         playsInSilentModeIOS: true,
         shouldDuckAndroid: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: true,
       });
-
       // Restore queue
       const savedQueue = await AsyncStorage.getItem('trackQueue');
       if (savedQueue) {
