@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { AVPlaybackStatus, Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 // hooks/useAudioPlayer.ts
 import { useEffect, useRef, useState } from 'react';
 
@@ -106,6 +106,30 @@ export function useAudioPlayer() {
       await Notifications.dismissAllNotificationsAsync();
     }
   };
+
+    /**
+     * Callback invoked by `Audio.Sound` whenever the playback status changes.
+     * Updates the current track's playback position and duration, and handles track completion.
+     *
+     * @param status - The current playback status provided by `expo-av`.
+     * @param node - The current `TrackNode` being played in the linked list.
+     */
+    const onPlaybackStatusUpdate = (
+      status: AVPlaybackStatus,
+      node: TrackNode | undefined,
+    ) => {
+      if (!status.isLoaded) return;
+      setDuration(status.durationMillis ?? 0);
+      setPosition(status.positionMillis ?? 0);
+  
+      if (status.isLoaded && status.didJustFinish) {
+        if (node?.next) {
+          playTrack(node.next.track); // use linked list directly
+        } else {
+          stop();
+        }
+      }
+    };
 
   return { playTrack, pauseTrack, stopTrack, isPlaying, soundRef };
 }

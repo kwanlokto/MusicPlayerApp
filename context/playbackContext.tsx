@@ -14,6 +14,7 @@ import React, {
 
 import { Track } from '@/type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 
 /**
  * Node in a doubly-linked list for playback.
@@ -84,8 +85,8 @@ const PlaybackContext = createContext<PlaybackContextType | undefined>(
 export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
-  const [isPlaying, setIsPlaying] = useState(false); // Playback state
+  const { playTrack as play, pauseTrack, stopTrack, isPlaying, soundRef } = useAudioPlayer();
+
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
   const [currentTrackNode, setCurrentTrackNode] = useState<
@@ -98,15 +99,15 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Setup audio + restore persisted state
     const loadState = async () => {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-        playThroughEarpieceAndroid: true,
-      });
+      // await Audio.setAudioModeAsync({
+      //   allowsRecordingIOS: false,
+      //   staysActiveInBackground: true,
+      //   interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+      //   playsInSilentModeIOS: true,
+      //   shouldDuckAndroid: true,
+      //   interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      //   playThroughEarpieceAndroid: true,
+      // });
       // Restore queue
       const savedQueue = await AsyncStorage.getItem('trackQueue');
       if (savedQueue) {
@@ -127,8 +128,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
           { uri: track.uri },
           { shouldPlay: false },
         );
-        sound.current = restoredSound;
-        sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+        soundRef.current = restoredSound;
+        soundRef.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
           onPlaybackStatusUpdate(status, node),
         );
       }
@@ -138,7 +139,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Cleanup
     return () => {
-      if (sound.current) sound.current.unloadAsync();
+      if (soundRef.current) soundRef.current.unloadAsync();
     };
   }, []);
 
@@ -175,7 +176,9 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       // Find the node immediately (don’t wait for React state)
       const node = trackNodeMap.current.get(track.uri);
-
+      setCurrentTrackNode(node); // React state, async
+      
+      await playTrack(track.uri, track.title)
       // Unload previous track safely
       if (sound.current) {
         await sound.current.stopAsync();
@@ -191,7 +194,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       sound.current = newSound;
       setIsPlaying(true);
-      setCurrentTrackNode(node); // React state, async
+      
 
       // Handle completion
       sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
@@ -203,29 +206,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  /**
-   * Callback invoked by `Audio.Sound` whenever the playback status changes.
-   * Updates the current track's playback position and duration, and handles track completion.
-   *
-   * @param status - The current playback status provided by `expo-av`.
-   * @param node - The current `TrackNode` being played in the linked list.
-   */
-  const onPlaybackStatusUpdate = (
-    status: AVPlaybackStatus,
-    node: TrackNode | undefined,
-  ) => {
-    if (!status.isLoaded) return;
-    setDuration(status.durationMillis ?? 0);
-    setPosition(status.positionMillis ?? 0);
 
-    if (status.isLoaded && status.didJustFinish) {
-      if (node?.next) {
-        playTrack(node.next.track); // use linked list directly
-      } else {
-        stop();
-      }
-    }
-  };
 
   /**
    * Adds multiple tracks to the playback linked list.
