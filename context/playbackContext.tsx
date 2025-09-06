@@ -280,7 +280,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     // await sound.current.stopAndUnloadAsync();
     setIsPlaying(false);
     setCurrentTrackNode(undefined);
-    // trackNodeMap.current.clear();
+    trackNodeMap.current.clear();
   };
 
   return (
