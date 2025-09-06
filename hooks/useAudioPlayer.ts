@@ -107,5 +107,5 @@ export function useAudioPlayer() {
     }
   };
 
-  return { playTrack, pauseTrack, stopTrack, isPlaying };
+  return { playTrack, pauseTrack, stopTrack, isPlaying, soundRef };
 }
