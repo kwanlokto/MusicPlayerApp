@@ -1,9 +1,9 @@
 import {
-  AudioPlayer,
-  AudioStatus,
-  createAudioPlayer,
-  setAudioModeAsync
-} from 'expo-audio';
+  AVPlaybackStatus,
+  Audio,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from 'expo-av';
 import React, {
   createContext,
   useContext,
@@ -84,7 +84,7 @@ const PlaybackContext = createContext<PlaybackContextType | undefined>(
 export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const sound = useRef<AudioPlayer | null>(null); // Currently playing Audio.Sound
+  const sound = useRef<Audio.Sound | null>(null); // Currently playing Audio.Sound
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
@@ -98,11 +98,14 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Setup audio + restore persisted state
     const loadState = async () => {
-      await setAudioModeAsync({
-        shouldPlayInBackground: true,
-        playsInSilentMode: true,
-        interruptionMode: 'duckOthers',
-        interruptionModeAndroid: 'duckOthers',
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: true,
       });
       // Restore queue
       const savedQueue = await AsyncStorage.getItem('trackQueue');
@@ -120,11 +123,14 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         const node = trackNodeMap.current.get(track.uri);
         setCurrentTrackNode(node);
 
-        const newSound = createAudioPlayer(track.uri);
-        newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
-          onPlaybackStatusUpdate(status, node);
-        });
-        sound.current = newSound;
+        const { sound: restoredSound } = await Audio.Sound.createAsync(
+          { uri: track.uri },
+          { shouldPlay: false },
+        );
+        sound.current = restoredSound;
+        sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+          onPlaybackStatusUpdate(status, node),
+        );
       }
     };
 
@@ -132,7 +138,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Cleanup
     return () => {
-      if (sound.current) sound.current.pause();
+      if (sound.current) sound.current.unloadAsync();
     };
   }, []);
 
@@ -170,15 +176,27 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       // Find the node immediately (don’t wait for React state)
       const node = trackNodeMap.current.get(track.uri);
 
+      // Unload previous track safely
+      if (sound.current) {
+        await sound.current.stopAsync();
+        await sound.current.unloadAsync();
+        sound.current.setOnPlaybackStatusUpdate(null);
+      }
+
       // Load and play new track
-      const newSound = createAudioPlayer(track.uri);
-      newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
-        onPlaybackStatusUpdate(status, node);
-      });
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: track.uri },
+        { shouldPlay: true },
+      );
 
       sound.current = newSound;
       setIsPlaying(true);
       setCurrentTrackNode(node); // React state, async
+
+      // Handle completion
+      sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+        onPlaybackStatusUpdate(status, node),
+      );
     } catch (e) {
       console.error('Error playing track:', e);
       setIsPlaying(false);
@@ -193,13 +211,12 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    * @param node - The current `TrackNode` being played in the linked list.
    */
   const onPlaybackStatusUpdate = (
-    status: AudioStatus,
+    status: AVPlaybackStatus,
     node: TrackNode | undefined,
   ) => {
     if (!status.isLoaded) return;
-    console.log(status);
-    setDuration(status.duration ?? 0);
-    setPosition(status.currentTime ?? 0);
+    setDuration(status.durationMillis ?? 0);
+    setPosition(status.positionMillis ?? 0);
 
     if (status.isLoaded && status.didJustFinish) {
       if (node?.next) {
@@ -251,7 +268,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleSlidingComplete = async (value: number) => {
     if (!sound.current) return;
-    await sound.current.seekTo(value);
+    await sound.current.setPositionAsync(value);
   };
 
   /**
@@ -260,13 +277,14 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const togglePlay = async () => {
     if (!sound.current) return;
-    if (!sound.current.isLoaded) return;
+    const status = (await sound.current.getStatusAsync()) as AVPlaybackStatus;
+    if (!status.isLoaded) return;
 
-    if (sound.current.playing) {
-      sound.current.pause();
+    if (status.isPlaying) {
+      await sound.current.pauseAsync();
       setIsPlaying(false);
     } else {
-      sound.current.play();
+      await sound.current.playAsync();
       setIsPlaying(true);
     }
   };
@@ -276,8 +294,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const stop = async () => {
     if (!sound.current) return;
-    sound.current.pause();
-    // await sound.current.stopAndUnloadAsync();
+    await sound.current.stopAsync();
+    await sound.current.unloadAsync();
     setIsPlaying(false);
     setCurrentTrackNode(undefined);
     trackNodeMap.current.clear();
