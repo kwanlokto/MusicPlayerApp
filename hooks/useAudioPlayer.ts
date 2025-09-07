@@ -6,12 +6,16 @@ import {
   setAudioModeAsync,
 } from 'expo-audio';
 import {
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+  AndroidImportance,
+  AndroidNotificationVisibility,
+  dismissAllNotificationsAsync,
+  scheduleNotificationAsync,
+  setNotificationChannelAsync,
+} from 'expo-notifications';
+import { useEffect, useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
@@ -37,6 +41,16 @@ export const useAudioPlayer = () => {
         interruptionMode: 'duckOthers',
         interruptionModeAndroid: 'duckOthers',
       });
+      if (Platform.OS === 'android') {
+        await setNotificationChannelAsync('music', {
+          name: 'Music Playback',
+          importance: AndroidImportance.MAX, // ✅ still works
+          sound: null,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+          lockscreenVisibility: AndroidNotificationVisibility.PUBLIC, // ✅ use this
+        });
+      }
       // Restore queue
       const savedQueue = await AsyncStorage.getItem('trackQueue');
       if (savedQueue) {
@@ -66,6 +80,7 @@ export const useAudioPlayer = () => {
     // Cleanup
     return () => {
       if (sound.current) sound.current.pause();
+      dismissAllNotificationsAsync();
     };
   }, []);
 
@@ -112,6 +127,16 @@ export const useAudioPlayer = () => {
       sound.current = newSound;
       setIsPlaying(true);
       setCurrentTrackNode(node); // React state, async
+      // Show persistent notification on Android
+      if (Platform.OS === 'android') {
+        await scheduleNotificationAsync({
+          content: {
+            title: 'Now Playing',
+            body: track.title,
+          },
+          trigger: null,
+        });
+      }
     } catch (e) {
       console.error('Error playing track:', e);
       setIsPlaying(false);
@@ -214,6 +239,10 @@ export const useAudioPlayer = () => {
     setIsPlaying(false);
     setCurrentTrackNode(undefined);
     trackNodeMap.current.clear();
+
+    if (Platform.OS === 'android') {
+      await dismissAllNotificationsAsync();
+    }
   };
 
   return {
@@ -230,4 +259,3 @@ export const useAudioPlayer = () => {
     stopTrack,
   };
 };
-
