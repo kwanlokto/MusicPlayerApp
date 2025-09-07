@@ -1,138 +1,233 @@
-import * as Notifications from 'expo-notifications';
+import { Track, TrackNode } from '@/type';
+import {
+  AudioPlayer,
+  AudioStatus,
+  createAudioPlayer,
+  setAudioModeAsync,
+} from 'expo-audio';
+import {
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
-import { AVPlaybackStatus, Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
-// hooks/useAudioPlayer.ts
-import { useEffect, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { TrackNode } from '@/type';
-import { Platform } from 'react-native';
+/**
+ * Provider component that wraps the app and manages linked-list audio playback.
+ */
+export const useAudioPlayer = () => {
+  const sound = useRef<AudioPlayer | null>(null); // Currently playing Audio.Sound
+  const [isPlaying, setIsPlaying] = useState(false); // Playback state
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
+  const [currentTrackNode, setCurrentTrackNode] = useState<
+    TrackNode | undefined
+  >(); // Node currently playing
 
-type Track = {
-  title: string;
-  uri: string;
-};
+  /** Map to quickly reference nodes by track URI */
+  const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
 
-export function useAudioPlayer() {
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  // Setup audio mode and notification channel on mount
   useEffect(() => {
-    (async () => {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-        playThroughEarpieceAndroid: true,
+    // Setup audio + restore persisted state
+    const loadState = async () => {
+      await setAudioModeAsync({
+        shouldPlayInBackground: true,
+        playsInSilentMode: true,
+        interruptionMode: 'duckOthers',
+        interruptionModeAndroid: 'duckOthers',
       });
-
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('music', {
-          name: 'Music Playback',
-          importance: Notifications.AndroidImportance.MAX, // ✅ still works
-          sound: null,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-          lockscreenVisibility:
-            Notifications.AndroidNotificationVisibility.PUBLIC, // ✅ use this
-        });
+      // Restore queue
+      const savedQueue = await AsyncStorage.getItem('trackQueue');
+      if (savedQueue) {
+        const tracks: Track[] = JSON.parse(savedQueue);
+        addToQueue(tracks);
       }
-    })();
 
+      // Restore track
+      const savedTrack = await AsyncStorage.getItem('currentTrack');
+      if (savedTrack) {
+        const track: Track = JSON.parse(savedTrack);
+
+        // Recreate node reference
+        const node = trackNodeMap.current.get(track.uri);
+        setCurrentTrackNode(node);
+
+        const newSound = createAudioPlayer(track.uri);
+        newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+          onPlaybackStatusUpdate(status, node);
+        });
+        sound.current = newSound;
+      }
+    };
+
+    loadState();
+
+    // Cleanup
     return () => {
-      // Cleanup
-      soundRef.current?.unloadAsync();
-      Notifications.dismissAllNotificationsAsync();
+      if (sound.current) sound.current.pause();
     };
   }, []);
 
-  // Play a track
-  const play = async (track: Track) => {
-    try {
-      // Unload previous
-      if (soundRef.current) {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-        soundRef.current.setOnPlaybackStatusUpdate(null);
-      }
+  // Persist track + queue whenever current changes
+  useEffect(() => {
+    if (!currentTrackNode) return;
 
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: track.uri },
-        { shouldPlay: true },
+    const persistState = async () => {
+      if (!currentTrackNode) return;
+      await AsyncStorage.setItem(
+        'currentTrack',
+        JSON.stringify(currentTrackNode.track),
       );
-
-      soundRef.current = sound;
-      setIsPlaying(true);
-
-      // Show persistent notification on Android
-      if (Platform.OS === 'android') {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Now Playing',
-            body: track.title,
-          },
-          trigger: null,
-        });
+      // Convert linked list to ordered array
+      const queue: Track[] = [];
+      let node: TrackNode | undefined = currentTrackNode;
+      while (node && node?.next?.track.uri !== currentTrackNode.track.uri) {
+        queue.push(node.track);
+        node = node.next;
       }
+      await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
+    };
 
-      // Listen for playback finish
-      sound.setOnPlaybackStatusUpdate(status => {
-        if (status.isLoaded && status.didJustFinish) {
-          stop();
-        }
+    persistState();
+  }, [currentTrackNode]);
+
+  /**
+   * Plays a single track immediately.
+   * Stops any currently playing track.
+   * Automatically sets up next track when finished.
+   * @param track Track to play
+   */
+  const playTrack = async (track: Track) => {
+    try {
+      // Find the node immediately (don’t wait for React state)
+      const node = trackNodeMap.current.get(track.uri);
+
+      // Load and play new track
+      const newSound = createAudioPlayer(track.uri);
+      newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+        onPlaybackStatusUpdate(status, node);
       });
-    } catch (error) {
-      console.error('Error playing track:', error);
-    }
-  };
 
-  // Pause
-  const pause = async () => {
-    if (soundRef.current) {
-      await soundRef.current.pauseAsync();
+      sound.current = newSound;
+      setIsPlaying(true);
+      setCurrentTrackNode(node); // React state, async
+    } catch (e) {
+      console.error('Error playing track:', e);
       setIsPlaying(false);
     }
   };
 
-  // Stop and cleanup
-  const stop = async () => {
-    if (soundRef.current) {
-      await soundRef.current.stopAsync();
-      await soundRef.current.unloadAsync();
-      soundRef.current = null;
-    }
-    setIsPlaying(false);
-    if (Platform.OS === 'android') {
-      await Notifications.dismissAllNotificationsAsync();
+  /**
+   * Callback invoked by `Audio.Sound` whenever the playback status changes.
+   * Updates the current track's playback position and duration, and handles track completion.
+   *
+   * @param status - The current playback status provided by `expo-av`.
+   * @param node - The current `TrackNode` being played in the linked list.
+   */
+  const onPlaybackStatusUpdate = (
+    status: AudioStatus,
+    node: TrackNode | undefined,
+  ) => {
+    if (!status.isLoaded) return;
+    console.log(status);
+    setDuration(status.duration ?? 0);
+    setPosition(status.currentTime ?? 0);
+
+    if (status.isLoaded && status.didJustFinish) {
+      if (node?.next) {
+        playTrack(node.next.track); // use linked list directly
+      } else {
+        stop();
+      }
     }
   };
 
-    /**
-     * Callback invoked by `Audio.Sound` whenever the playback status changes.
-     * Updates the current track's playback position and duration, and handles track completion.
-     *
-     * @param status - The current playback status provided by `expo-av`.
-     * @param node - The current `TrackNode` being played in the linked list.
-     */
-    const onPlaybackStatusUpdate = (
-      status: AVPlaybackStatus,
-      node: TrackNode | undefined,
-    ) => {
-      if (!status.isLoaded) return;
-      setDuration(status.durationMillis ?? 0);
-      setPosition(status.positionMillis ?? 0);
-  
-      if (status.isLoaded && status.didJustFinish) {
-        if (node?.next) {
-          play(node.next.track); // use linked list directly
-        } else {
-          stop();
-        }
-      }
-    };
+  /**
+   * Adds multiple tracks to the playback linked list.
+   * Links nodes together to form a doubly-linked list.
+   * @param tracks Array of Track objects
+   */
+  const addToQueue = (tracks: Track[]) => {
+    let prevNode: TrackNode | undefined;
+    let headNode: TrackNode | undefined;
+    tracks.forEach(track => {
+      const node: TrackNode = { track, prev: prevNode };
+      if (prevNode) prevNode.next = node;
+      else headNode = node; // Set head if list empty
+      prevNode = node;
+      trackNodeMap.current.set(track.uri, node);
+    });
+    if (prevNode) prevNode.next = headNode; // Create a loop
+  };
 
-  return { play, pause, stop, isPlaying, soundRef };
-}
+  /**
+   * Plays the next track in the linked list.
+   * Stops playback if there is no next node.
+   */
+  const playNext = () => {
+    if (!currentTrackNode?.next) {
+      stop();
+      return;
+    }
+    playTrack(currentTrackNode.next.track);
+  };
+
+  /**
+   * Plays the previous track in the linked list.
+   * Does nothing if there is no previous node.
+   */
+  const playPrevious = () => {
+    if (!currentTrackNode?.prev) return;
+    playTrack(currentTrackNode.prev.track);
+  };
+
+  const handleSlidingComplete = async (value: number) => {
+    if (!sound.current) return;
+    await sound.current.seekTo(value);
+  };
+
+  /**
+   * Toggles playback of the current track.
+   * Pauses if playing, resumes if paused.
+   */
+  const togglePlay = async () => {
+    if (!sound.current) return;
+    if (!sound.current.isLoaded) return;
+
+    if (sound.current.playing) {
+      sound.current.pause();
+      setIsPlaying(false);
+    } else {
+      sound.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  /**
+   * Stops playback completely
+   */
+  const stop = async () => {
+    if (!sound.current) return;
+    sound.current.pause();
+    // await sound.current.stopAndUnloadAsync();
+    setIsPlaying(false);
+    setCurrentTrackNode(undefined);
+    trackNodeMap.current.clear();
+  };
+
+  return {
+    isPlaying,
+    position,
+    duration,
+    currentTrackNode,
+    playTrack,
+    addToQueue,
+    playNext,
+    playPrevious,
+    handleSlidingComplete,
+    togglePlay,
+    stop,
+  };
+};
+
