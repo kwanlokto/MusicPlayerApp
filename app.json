@@ -17,8 +17,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "useNextNotificationsApi": true,
       "edgeToEdgeEnabled": true,
-      "permissions": ["WAKE_LOCK"],
+      "permissions": ["WAKE_LOCK", "FOREGROUND_SERVICE"],
       "package": "com.kwanlokto.MusicPlayerApp"
     },
     "web": {
