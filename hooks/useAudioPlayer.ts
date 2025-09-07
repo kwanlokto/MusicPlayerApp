@@ -138,7 +138,7 @@ export const useAudioPlayer = () => {
       if (node?.next) {
         playTrack(node.next.track); // use linked list directly
       } else {
-        stop();
+        stopTrack();
       }
     }
   };
@@ -167,7 +167,7 @@ export const useAudioPlayer = () => {
    */
   const playNext = () => {
     if (!currentTrackNode?.next) {
-      stop();
+      stopTrack();
       return;
     }
     playTrack(currentTrackNode.next.track);
@@ -207,7 +207,7 @@ export const useAudioPlayer = () => {
   /**
    * Stops playback completely
    */
-  const stop = async () => {
+  const stopTrack = async () => {
     if (!sound.current) return;
     sound.current.pause();
     // await sound.current.stopAndUnloadAsync();
@@ -227,7 +227,7 @@ export const useAudioPlayer = () => {
     playPrevious,
     handleSlidingComplete,
     togglePlay,
-    stop,
+    stopTrack,
   };
 };
 
