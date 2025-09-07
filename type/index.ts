@@ -12,3 +12,15 @@ export type Track = {
   /** Display title of the track */
   title: string;
 };
+
+/**
+ * Node in a doubly-linked list for playback.
+ */
+export type TrackNode = {
+  /** The track stored in this node */
+  track: Track;
+  /** Next node in the list */
+  next?: TrackNode;
+  /** Previous node in the list */
+  prev?: TrackNode;
+};

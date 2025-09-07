@@ -1,9 +1,5 @@
-import {
-  AVPlaybackStatus,
-  Audio,
-  InterruptionModeAndroid,
-  InterruptionModeIOS,
-} from 'expo-av';
+import { Track, TrackNode } from '@/type';
+import { AVPlaybackStatus, Audio } from 'expo-av';
 import React, {
   createContext,
   useContext,
@@ -12,21 +8,8 @@ import React, {
   useState,
 } from 'react';
 
-import { Track } from '@/type';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
-
-/**
- * Node in a doubly-linked list for playback.
- */
-type TrackNode = {
-  /** The track stored in this node */
-  track: Track;
-  /** Next node in the list */
-  next?: TrackNode;
-  /** Previous node in the list */
-  prev?: TrackNode;
-};
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Defines the shape of the PlaybackContext.
@@ -69,7 +52,7 @@ type PlaybackContextType = {
   togglePlay: () => Promise<void>;
 
   /** Stops playback completely and clears the linked list. */
-  stop: () => Promise<void>;
+  stopTrack: () => Promise<void>;
 };
 
 /**
@@ -85,7 +68,7 @@ const PlaybackContext = createContext<PlaybackContextType | undefined>(
 export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { playTrack as play, pauseTrack, stopTrack, isPlaying, soundRef } = useAudioPlayer();
+  const { play, pause, stop, isPlaying, soundRef } = useAudioPlayer();
 
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
@@ -177,36 +160,41 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       // Find the node immediately (don’t wait for React state)
       const node = trackNodeMap.current.get(track.uri);
       setCurrentTrackNode(node); // React state, async
-      
-      await playTrack(track.uri, track.title)
-      // Unload previous track safely
-      if (sound.current) {
-        await sound.current.stopAsync();
-        await sound.current.unloadAsync();
-        sound.current.setOnPlaybackStatusUpdate(null);
-      }
 
-      // Load and play new track
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: track.uri },
-        { shouldPlay: true },
-      );
-
-      sound.current = newSound;
-      setIsPlaying(true);
-      
+      await play(track);
 
       // Handle completion
-      sound.current.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
+      soundRef.current?.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) =>
         onPlaybackStatusUpdate(status, node),
       );
     } catch (e) {
       console.error('Error playing track:', e);
-      setIsPlaying(false);
     }
   };
 
+  /**
+   * Callback invoked by `Audio.Sound` whenever the playback status changes.
+   * Updates the current track's playback position and duration, and handles track completion.
+   *
+   * @param status - The current playback status provided by `expo-av`.
+   * @param node - The current `TrackNode` being played in the linked list.
+   */
+  const onPlaybackStatusUpdate = (
+    status: AVPlaybackStatus,
+    node: TrackNode | undefined,
+  ) => {
+    if (!status.isLoaded) return;
+    setDuration(status.durationMillis ?? 0);
+    setPosition(status.positionMillis ?? 0);
 
+    if (status.isLoaded && status.didJustFinish) {
+      if (node?.next) {
+        play(node.next.track); // use linked list directly
+      } else {
+        stop();
+      }
+    }
+  };
 
   /**
    * Adds multiple tracks to the playback linked list.
@@ -248,8 +236,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleSlidingComplete = async (value: number) => {
-    if (!sound.current) return;
-    await sound.current.setPositionAsync(value);
+    if (!soundRef.current) return;
+    await soundRef.current.setPositionAsync(value);
   };
 
   /**
@@ -257,15 +245,15 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
    * Pauses if playing, resumes if paused.
    */
   const togglePlay = async () => {
-    if (!sound.current) return;
-    const status = (await sound.current.getStatusAsync()) as AVPlaybackStatus;
+    if (!soundRef.current) return;
+    const status = (await soundRef.current.getStatusAsync()) as AVPlaybackStatus;
     if (!status.isLoaded) return;
 
     if (status.isPlaying) {
-      await sound.current.pauseAsync();
+      await soundRef.current.pauseAsync();
       setIsPlaying(false);
     } else {
-      await sound.current.playAsync();
+      await soundRef.current.playAsync();
       setIsPlaying(true);
     }
   };
@@ -273,13 +261,8 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   /**
    * Stops playback completely
    */
-  const stop = async () => {
-    if (!sound.current) return;
-    await sound.current.stopAsync();
-    await sound.current.unloadAsync();
-    setIsPlaying(false);
-    setCurrentTrackNode(undefined);
-    trackNodeMap.current.clear();
+  const stopTrack = async () => {
+    stop()
   };
 
   return (
@@ -295,7 +278,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         playPrevious,
         handleSlidingComplete,
         togglePlay,
-        stop,
+        stopTrack,
       }}
     >
       {children}

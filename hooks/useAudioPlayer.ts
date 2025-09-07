@@ -4,6 +4,7 @@ import { AVPlaybackStatus, Audio, InterruptionModeAndroid, InterruptionModeIOS }
 // hooks/useAudioPlayer.ts
 import { useEffect, useRef, useState } from 'react';
 
+import { TrackNode } from '@/type';
 import { Platform } from 'react-native';
 
 type Track = {
@@ -49,11 +50,13 @@ export function useAudioPlayer() {
   }, []);
 
   // Play a track
-  const playTrack = async (track: Track) => {
+  const play = async (track: Track) => {
     try {
       // Unload previous
       if (soundRef.current) {
+        await soundRef.current.stopAsync();
         await soundRef.current.unloadAsync();
+        soundRef.current.setOnPlaybackStatusUpdate(null);
       }
 
       const { sound } = await Audio.Sound.createAsync(
@@ -78,7 +81,7 @@ export function useAudioPlayer() {
       // Listen for playback finish
       sound.setOnPlaybackStatusUpdate(status => {
         if (status.isLoaded && status.didJustFinish) {
-          stopTrack();
+          stop();
         }
       });
     } catch (error) {
@@ -87,7 +90,7 @@ export function useAudioPlayer() {
   };
 
   // Pause
-  const pauseTrack = async () => {
+  const pause = async () => {
     if (soundRef.current) {
       await soundRef.current.pauseAsync();
       setIsPlaying(false);
@@ -95,7 +98,7 @@ export function useAudioPlayer() {
   };
 
   // Stop and cleanup
-  const stopTrack = async () => {
+  const stop = async () => {
     if (soundRef.current) {
       await soundRef.current.stopAsync();
       await soundRef.current.unloadAsync();
@@ -124,12 +127,12 @@ export function useAudioPlayer() {
   
       if (status.isLoaded && status.didJustFinish) {
         if (node?.next) {
-          playTrack(node.next.track); // use linked list directly
+          play(node.next.track); // use linked list directly
         } else {
           stop();
         }
       }
     };
 
-  return { playTrack, pauseTrack, stopTrack, isPlaying, soundRef };
+  return { play, pause, stop, isPlaying, soundRef };
 }
