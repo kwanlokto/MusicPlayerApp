@@ -11,11 +11,21 @@ import {
   dismissAllNotificationsAsync,
   scheduleNotificationAsync,
   setNotificationChannelAsync,
+  setNotificationHandler,
 } from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+
+setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
