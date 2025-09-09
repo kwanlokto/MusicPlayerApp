@@ -89,7 +89,10 @@ export const useAudioPlayer = () => {
 
     // Cleanup
     return () => {
-      if (sound.current) sound.current.pause();
+      if (sound.current) {
+        sound.current.pause();
+        sound.current.remove();
+      }
       dismissAllNotificationsAsync();
     };
   }, []);
@@ -125,6 +128,11 @@ export const useAudioPlayer = () => {
    */
   const playTrack = async (track: Track) => {
     try {
+      if (sound.current) {
+        sound.current.pause();
+        sound.current.remove();
+      }
+
       // Find the node immediately (don’t wait for React state)
       const node = trackNodeMap.current.get(track.uri);
 
@@ -133,7 +141,7 @@ export const useAudioPlayer = () => {
       newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
         onPlaybackStatusUpdate(status, node);
       });
-
+      newSound.play();
       sound.current = newSound;
       setIsPlaying(true);
       setCurrentTrackNode(node); // React state, async
@@ -166,8 +174,8 @@ export const useAudioPlayer = () => {
   ) => {
     if (!status.isLoaded) return;
     console.log(status);
-    setDuration(status.duration ?? 0);
-    setPosition(status.currentTime ?? 0);
+    setDuration(status.duration);
+    setPosition(status.currentTime);
 
     if (status.isLoaded && status.didJustFinish) {
       if (node?.next) {
@@ -233,8 +241,18 @@ export const useAudioPlayer = () => {
     if (sound.current.playing) {
       sound.current.pause();
       setIsPlaying(false);
-    } else {
+    } else if (currentTrackNode) {
       sound.current.play();
+      // Show persistent notification on Android
+      if (Platform.OS === 'android') {
+        await scheduleNotificationAsync({
+          content: {
+            title: 'Now Playing',
+            body: currentTrackNode.track.title,
+          },
+          trigger: null,
+        });
+      }
       setIsPlaying(true);
     }
   };
