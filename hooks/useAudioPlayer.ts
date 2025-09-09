@@ -133,7 +133,7 @@ export const useCustomAudioPlayer = () => {
       sound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
         onPlaybackStatusUpdate(status, node);
       });
-
+      if (!sound.playing) sound.play();
       setIsPlaying(true);
       setCurrentTrackNode(node); // React state, async
       // Show persistent notification on Android
