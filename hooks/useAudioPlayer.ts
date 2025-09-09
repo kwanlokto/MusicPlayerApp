@@ -172,9 +172,6 @@ export const useCustomAudioPlayer = () => {
     if (status.isLoaded && status.didJustFinish && !didFinishRef.current) {
       didFinishRef.current = true;
       if (node?.next) {
-        console.log(
-          `NEXT TRACK ${node.next.track.title} ${status.currentTime}`,
-        );
         playTrack(node.next.track); // use linked list directly
       } else {
         stopTrack();
