@@ -15,8 +15,8 @@ import React from 'react';
 
 export default function Index() {
   const {
-    position,
-    duration,
+    position, // In seconds
+    duration, // In seconds
     currentTrackNode,
     isPlaying,
     togglePlay,
@@ -72,10 +72,10 @@ export default function Index() {
               }}
             >
               <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
-                {formatTime(position)}
+                {formatTime(position * 1000)}
               </Text>
               <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
-                {formatTime(duration)}
+                {formatTime(duration * 1000)}
               </Text>
             </View>
 
