@@ -1,10 +1,5 @@
 import { Track, TrackNode } from '@/type';
-import {
-  AudioPlayer,
-  AudioStatus,
-  createAudioPlayer,
-  setAudioModeAsync,
-} from 'expo-audio';
+import { AudioStatus, setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import {
   AndroidImportance,
   AndroidNotificationVisibility,
@@ -30,8 +25,10 @@ setNotificationHandler({
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
  */
-export const useAudioPlayer = () => {
-  const sound = useRef<AudioPlayer | null>(null); // Currently playing Audio.Sound
+export const useCustomAudioPlayer = () => {
+  const sound = useAudioPlayer('');
+  const didFinishRef = useRef<boolean>(false);
+
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
@@ -77,11 +74,11 @@ export const useAudioPlayer = () => {
         const node = trackNodeMap.current.get(track.uri);
         setCurrentTrackNode(node);
 
-        const newSound = createAudioPlayer(track.uri);
-        newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+        sound.replace(track.uri);
+        sound.removeAllListeners('playbackStatusUpdate');
+        sound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
           onPlaybackStatusUpdate(status, node);
         });
-        sound.current = newSound;
       }
     };
 
@@ -89,10 +86,8 @@ export const useAudioPlayer = () => {
 
     // Cleanup
     return () => {
-      if (sound.current) {
-        sound.current.pause();
-        sound.current.remove();
-      }
+      sound.pause();
+      sound.remove();
       dismissAllNotificationsAsync();
     };
   }, []);
@@ -128,21 +123,17 @@ export const useAudioPlayer = () => {
    */
   const playTrack = async (track: Track) => {
     try {
-      if (sound.current) {
-        sound.current.pause();
-        sound.current.remove();
-      }
-
       // Find the node immediately (don’t wait for React state)
       const node = trackNodeMap.current.get(track.uri);
 
       // Load and play new track
-      const newSound = createAudioPlayer(track.uri);
-      newSound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+      sound.replace(track.uri);
+      sound.seekTo(0)
+      sound.removeAllListeners('playbackStatusUpdate');
+      sound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
         onPlaybackStatusUpdate(status, node);
       });
-      newSound.play();
-      sound.current = newSound;
+
       setIsPlaying(true);
       setCurrentTrackNode(node); // React state, async
       // Show persistent notification on Android
@@ -155,6 +146,8 @@ export const useAudioPlayer = () => {
           trigger: null,
         });
       }
+      // reset if playback restarted
+      didFinishRef.current = false;
     } catch (e) {
       console.error('Error playing track:', e);
       setIsPlaying(false);
@@ -173,12 +166,15 @@ export const useAudioPlayer = () => {
     node: TrackNode | undefined,
   ) => {
     if (!status.isLoaded) return;
-    console.log(status);
     setDuration(status.duration);
     setPosition(status.currentTime);
 
-    if (status.isLoaded && status.didJustFinish) {
+    if (status.isLoaded && status.didJustFinish && !didFinishRef.current) {
+      didFinishRef.current = true;
       if (node?.next) {
+        console.log(
+          `NEXT TRACK ${node.next.track.title} ${status.currentTime}`,
+        );
         playTrack(node.next.track); // use linked list directly
       } else {
         stopTrack();
@@ -226,8 +222,7 @@ export const useAudioPlayer = () => {
   };
 
   const handleSlidingComplete = async (value: number) => {
-    if (!sound.current) return;
-    await sound.current.seekTo(value);
+    await sound.seekTo(value);
   };
 
   /**
@@ -235,14 +230,13 @@ export const useAudioPlayer = () => {
    * Pauses if playing, resumes if paused.
    */
   const togglePlay = async () => {
-    if (!sound.current) return;
-    if (!sound.current.isLoaded) return;
+    if (!sound.isLoaded) return;
 
-    if (sound.current.playing) {
-      sound.current.pause();
+    if (sound.playing) {
+      sound.pause();
       setIsPlaying(false);
     } else if (currentTrackNode) {
-      sound.current.play();
+      sound.play();
       // Show persistent notification on Android
       if (Platform.OS === 'android') {
         await scheduleNotificationAsync({
@@ -261,8 +255,8 @@ export const useAudioPlayer = () => {
    * Stops playback completely
    */
   const stopTrack = async () => {
-    if (!sound.current) return;
-    sound.current.pause();
+    sound.pause();
+    sound.remove();
     // await sound.current.stopAndUnloadAsync();
     setIsPlaying(false);
     setCurrentTrackNode(undefined);

@@ -1,7 +1,6 @@
+import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track, TrackNode } from '@/type';
 import React, { createContext, useContext } from 'react';
-
-import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 
 /**
  * Defines the shape of the PlaybackContext.
@@ -72,7 +71,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     handleSlidingComplete,
     togglePlay,
     stopTrack,
-  } = useAudioPlayer();
+  } = useCustomAudioPlayer();
 
   return (
     <PlaybackContext.Provider
