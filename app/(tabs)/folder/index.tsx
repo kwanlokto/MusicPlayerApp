@@ -31,7 +31,19 @@ export default function FolderListScreen() {
 
   const loadSongs = async () => {
     const albums = await MediaLibrary.getAlbumsAsync();
-    const nonEmptyAlbums = albums.filter(album => album.assetCount > 0);
+    const nonEmptyAlbums = [];
+
+    for (const album of albums) {
+    const assets = await MediaLibrary.getAssetsAsync({
+      album: album.id,
+      mediaType: MediaLibrary.MediaType.audio,
+      first: 1, // we only need to know if at least one exists
+    });
+
+    if (assets.assets.length > 0) {
+      nonEmptyAlbums.push(album);
+    }
+  }
 
     const uniqueFolderTitles = Array.from(
       new Set(nonEmptyAlbums.map(album => album.title)),
