@@ -1,6 +1,7 @@
-import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
-import { Track, TrackNode } from '@/type';
 import React, { createContext, useContext } from 'react';
+
+import { Track } from 'react-native-track-player';
+import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 
 /**
  * Defines the shape of the PlaybackContext.
@@ -16,13 +17,13 @@ type PlaybackContextType = {
   position: number;
 
   /** Current track node being played */
-  currentTrackNode?: TrackNode;
+  title?: string;
 
   /**
    * Plays a single track immediately, updating currentTrackNode.
    * @param track Track to play
    */
-  playTrack: (track: Track) => Promise<void>;
+  playTrack: (index: number) => Promise<void>;
 
   /**
    * Adds multiple tracks to the playback linked list.
@@ -63,7 +64,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     isPlaying,
     position,
     duration,
-    currentTrackNode,
+    title,
     playTrack,
     addToQueue,
     playNext,
@@ -79,7 +80,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         isPlaying,
         position,
         duration,
-        currentTrackNode,
+        title,
         playTrack,
         addToQueue,
         playNext,

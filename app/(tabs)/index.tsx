@@ -7,17 +7,17 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { usePlayback } from '@/context/playbackContext';
-import { formatTime } from '@/helpers';
 import { Ionicons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
 import React from 'react';
+import Slider from '@react-native-community/slider';
+import { formatTime } from '@/helpers';
+import { usePlayback } from '@/context/playbackContext';
 
 export default function Index() {
   const {
     position, // In seconds
     duration, // In seconds
-    currentTrackNode,
+    title,
     isPlaying,
     togglePlay,
     playNext,
@@ -29,7 +29,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      {!currentTrackNode?.track?.title ? (
+      {!title ? (
         <>
           <Text style={styles.title}>🎶 Music Player</Text>
           <Text style={styles.track}>No track playing</Text>
@@ -48,7 +48,7 @@ export default function Index() {
           <View
             style={{ marginBottom: '10%', alignItems: 'center', width: '90%' }}
           >
-            <Text style={styles.title}>{currentTrackNode.track.title}</Text>
+            <Text style={styles.title}>{title}</Text>
             <Text style={styles.artist}>Unknown Artist</Text>
 
             {/* Progress Bar */}

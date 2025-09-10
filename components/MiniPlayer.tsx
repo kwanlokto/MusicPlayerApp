@@ -9,12 +9,12 @@ import {
 } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
-import { usePlayback } from '@/context/playbackContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { usePlayback } from '@/context/playbackContext';
 
 export const MiniPlayer = () => {
-  const { currentTrackNode, isPlaying, togglePlay, playNext, playPrevious } =
+  const { title, isPlaying, togglePlay, playNext, playPrevious } =
     usePlayback();
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
@@ -22,7 +22,7 @@ export const MiniPlayer = () => {
   return (
     <View style={styles.container}>
       <Text numberOfLines={1} style={styles.title}>
-        {currentTrackNode?.track?.title ?? 'No track playing'}
+        {title ?? 'No track playing'}
       </Text>
 
       <View style={styles.controls}>

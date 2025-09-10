@@ -1,9 +1,6 @@
 import * as MediaLibrary from 'expo-media-library';
 
 import { Colors, primaryButton } from '@/constants/Colors';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -12,9 +9,12 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 
-import { usePlayback } from '@/context/playbackContext';
 import { formatDuration } from '@/helpers';
+import { usePlayback } from '@/context/playbackContext';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
@@ -49,14 +49,14 @@ export default function FolderPage() {
 
     // Create a queue of track URIs and titles
     const tracks = songs.map(song => ({
-      uri: song.uri,
+      url: song.uri,
       title: song.filename,
     }));
 
     // Send queue to playback context
     addToQueue(tracks);
     // Start playing the first track
-    playTrack(tracks[index]);
+    playTrack(index);
   };
 
   // Shuffle all songs and play the first song
@@ -76,14 +76,14 @@ export default function FolderPage() {
     }
 
     const tracks = shuffledSongs.map(song => ({
-      uri: song.uri,
+      url: song.uri,
       title: song.filename,
     }));
     // Update queue in context
     addToQueue(tracks);
 
     // Start playback from the first track
-    playTrack(tracks[0]);
+    playTrack(0);
   };
 
   return (
