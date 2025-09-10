@@ -47,6 +47,7 @@ export const useCustomAudioPlayer = () => {
         playsInSilentMode: true,
         interruptionMode: 'duckOthers',
         interruptionModeAndroid: 'duckOthers',
+        shouldRouteThroughEarpiece: true
       });
       if (Platform.OS === 'android') {
         await setNotificationChannelAsync('music', {
