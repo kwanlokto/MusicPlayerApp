@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -6,7 +7,6 @@ import TrackPlayer, {
   Track,
   useTrackPlayerEvents,
 } from 'react-native-track-player';
-import { useEffect, useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -60,6 +60,7 @@ export const useCustomAudioPlayer = () => {
       }
 
       if (event.type === Event.PlaybackProgressUpdated) {
+        console.log(event)
         setPosition(event.position * 1000); // ms
         setDuration(event.duration * 1000); // ms
       }
@@ -192,7 +193,7 @@ export const useCustomAudioPlayer = () => {
     await TrackPlayer.add(
       tracks.map(track => {
         return {
-          url: track.uri,
+          url: track.url,
           title: track.title,
           artist: '',
         };
@@ -225,7 +226,7 @@ export const useCustomAudioPlayer = () => {
    * Pauses if playing, resumes if paused.
    */
   const togglePlay = async () => {
-    if (!isPlaying) {
+    if (isPlaying) {
       await TrackPlayer.pause();
     } else {
       await TrackPlayer.play();
