@@ -10,15 +10,6 @@ import TrackPlayer, {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldPlaySound: false,
-//     shouldSetBadge: false,
-//     shouldShowBanner: true,
-//     shouldShowList: true,
-//   }),
-// });
-
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
  */
@@ -29,12 +20,6 @@ export const useCustomAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false); // Playback state
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
-  // const [currentTrackNode, setCurrentTrackNode] = useState<
-  //   TrackNode | undefined
-  // >(); // Node currently playing
-
-  /** Map to quickly reference nodes by track URI */
-  // const trackNodeMap = useRef<Map<string, TrackNode>>(new Map());
 
   // --- TrackPlayer event listeners ---
   useTrackPlayerEvents(
@@ -46,17 +31,6 @@ export const useCustomAudioPlayer = () => {
     async event => {
       if (event.type === Event.PlaybackState) {
         setIsPlaying(event.state === State.Playing);
-
-        // Show persistent notification on Android
-        // if (Platform.OS === 'android') {
-        //   await scheduleNotificationAsync({
-        //     content: {
-        //       title: 'Now Playing',
-        //       body: title,
-        //     },
-        //     trigger: null,
-        //   });
-        // }
       }
 
       if (event.type === Event.PlaybackProgressUpdated) {
@@ -103,25 +77,6 @@ export const useCustomAudioPlayer = () => {
           Capability.SkipToPrevious,
         ],
       });
-
-      // if (Platform.OS === 'android') {
-      //   await setNotificationChannelAsync('music', {
-      //     name: 'Music Playback',
-      //     importance: AndroidImportance.MAX, // ✅ still works
-      //     sound: null,
-      //     vibrationPattern: [0, 250, 250, 250],
-      //     lightColor: '#FF231F7C',
-      //     lockscreenVisibility: AndroidNotificationVisibility.PUBLIC, // ✅ use this
-      //   });
-      // }
-      // Restore queue
-      // const savedQueue = await AsyncStorage.getItem('trackQueue');
-      // if (savedQueue) {
-      //   const tracks: Track[] = JSON.parse(savedQueue);
-
-      //   await TrackPlayer.reset();
-      //   await addToQueue(tracks);
-      // }
     };
 
     setup();
@@ -129,7 +84,6 @@ export const useCustomAudioPlayer = () => {
     // Cleanup
     return () => {
       TrackPlayer.reset();
-      // dismissAllNotificationsAsync();
     };
   }, []);
 
@@ -157,31 +111,6 @@ export const useCustomAudioPlayer = () => {
       console.error('Error playing track:', e);
     }
   };
-
-  /**
-   * Callback invoked by `Audio.Sound` whenever the playback status changes.
-   * Updates the current track's playback position and duration, and handles track completion.
-   *
-   * @param status - The current playback status provided by `expo-av`.
-   * @param node - The current `TrackNode` being played in the linked list.
-   */
-  // const onPlaybackStatusUpdate = (
-  //   status: AudioStatus,
-  //   node: TrackNode | undefined,
-  // ) => {
-  //   if (!status.isLoaded) return;
-  //   setDuration(status.duration);
-  //   setPosition(status.currentTime);
-
-  //   if (status.isLoaded && status.didJustFinish && !didFinishRef.current) {
-  //     didFinishRef.current = true;
-  //     if (node?.next) {
-  //       playTrack(node.next.track); // use linked list directly
-  //     } else {
-  //       stopTrack();
-  //     }
-  //   }
-  // };
 
   /**
    * Adds multiple tracks to the playback linked list.
@@ -240,10 +169,6 @@ export const useCustomAudioPlayer = () => {
     await TrackPlayer.stop();
     await AsyncStorage.removeItem('currentTrack');
     await AsyncStorage.removeItem('trackQueue');
-
-    // if (Platform.OS === 'android') {
-    //   await dismissAllNotificationsAsync();
-    // }
   };
 
   return {
