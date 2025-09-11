@@ -60,9 +60,8 @@ export const useCustomAudioPlayer = () => {
       }
 
       if (event.type === Event.PlaybackProgressUpdated) {
-        console.log(event)
-        setPosition(event.position * 1000); // ms
-        setDuration(event.duration * 1000); // ms
+        setPosition(event.position);
+        setDuration(event.duration);
       }
 
       if (
@@ -88,6 +87,7 @@ export const useCustomAudioPlayer = () => {
         android: {
           appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback, // or StopPlayback, or PausePlayback
         },
+        progressUpdateEventInterval: 0.1,
         capabilities: [
           Capability.Play,
           Capability.Pause,
@@ -218,7 +218,7 @@ export const useCustomAudioPlayer = () => {
   };
 
   const handleSlidingComplete = async (value: number) => {
-    await TrackPlayer.seekTo(value / 1000); // TrackPlayer uses seconds
+    await TrackPlayer.seekTo(value); // TrackPlayer uses seconds
   };
 
   /**

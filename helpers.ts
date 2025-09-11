@@ -15,8 +15,8 @@ export const formatDuration = (durationSec: number) => {
 export const capitalize = (str: string) =>
   str.replace(/\b\w/g, char => char.toUpperCase());
 
-export const formatTime = (ms: number) => {
-  const totalSeconds = Math.floor(ms / 1000);
+export const formatTime = (rawSeconds: number) => {
+  const totalSeconds = Math.floor(rawSeconds);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;

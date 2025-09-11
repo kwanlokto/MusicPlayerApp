@@ -7,11 +7,11 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import Slider from '@react-native-community/slider';
-import { formatTime } from '@/helpers';
 import { usePlayback } from '@/context/playbackContext';
+import { formatTime } from '@/helpers';
+import { Ionicons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
+import React from 'react';
 
 export default function Index() {
   const {
@@ -72,10 +72,10 @@ export default function Index() {
               }}
             >
               <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
-                {formatTime(position * 1000)}
+                {formatTime(position)}
               </Text>
               <Text style={{ color: Colors[scheme ?? 'dark'].subText }}>
-                {formatTime(duration * 1000)}
+                {formatTime(duration)}
               </Text>
             </View>
 
