@@ -1,11 +1,3 @@
-import {
-  AndroidImportance,
-  AndroidNotificationVisibility,
-  dismissAllNotificationsAsync,
-  scheduleNotificationAsync,
-  setNotificationChannelAsync,
-  setNotificationHandler,
-} from 'expo-notifications';
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -17,16 +9,15 @@ import TrackPlayer, {
 import { useEffect, useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 
-setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//     shouldShowBanner: true,
+//     shouldShowList: true,
+//   }),
+// });
 
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
@@ -57,15 +48,15 @@ export const useCustomAudioPlayer = () => {
         setIsPlaying(event.state === State.Playing);
 
         // Show persistent notification on Android
-        if (Platform.OS === 'android') {
-          await scheduleNotificationAsync({
-            content: {
-              title: 'Now Playing',
-              body: title,
-            },
-            trigger: null,
-          });
-        }
+        // if (Platform.OS === 'android') {
+        //   await scheduleNotificationAsync({
+        //     content: {
+        //       title: 'Now Playing',
+        //       body: title,
+        //     },
+        //     trigger: null,
+        //   });
+        // }
       }
 
       if (event.type === Event.PlaybackProgressUpdated) {
@@ -112,24 +103,24 @@ export const useCustomAudioPlayer = () => {
         ],
       });
 
-      if (Platform.OS === 'android') {
-        await setNotificationChannelAsync('music', {
-          name: 'Music Playback',
-          importance: AndroidImportance.MAX, // ✅ still works
-          sound: null,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-          lockscreenVisibility: AndroidNotificationVisibility.PUBLIC, // ✅ use this
-        });
-      }
+      // if (Platform.OS === 'android') {
+      //   await setNotificationChannelAsync('music', {
+      //     name: 'Music Playback',
+      //     importance: AndroidImportance.MAX, // ✅ still works
+      //     sound: null,
+      //     vibrationPattern: [0, 250, 250, 250],
+      //     lightColor: '#FF231F7C',
+      //     lockscreenVisibility: AndroidNotificationVisibility.PUBLIC, // ✅ use this
+      //   });
+      // }
       // Restore queue
-      const savedQueue = await AsyncStorage.getItem('trackQueue');
-      if (savedQueue) {
-        const tracks: Track[] = JSON.parse(savedQueue);
+      // const savedQueue = await AsyncStorage.getItem('trackQueue');
+      // if (savedQueue) {
+      //   const tracks: Track[] = JSON.parse(savedQueue);
 
-        await TrackPlayer.reset();
-        await addToQueue(tracks);
-      }
+      //   await TrackPlayer.reset();
+      //   await addToQueue(tracks);
+      // }
     };
 
     setup();
@@ -137,7 +128,7 @@ export const useCustomAudioPlayer = () => {
     // Cleanup
     return () => {
       TrackPlayer.reset();
-      dismissAllNotificationsAsync();
+      // dismissAllNotificationsAsync();
     };
   }, []);
 
@@ -234,8 +225,7 @@ export const useCustomAudioPlayer = () => {
    * Pauses if playing, resumes if paused.
    */
   const togglePlay = async () => {
-    const state = await TrackPlayer.getState();
-    if (state === State.Playing) {
+    if (!isPlaying) {
       await TrackPlayer.pause();
     } else {
       await TrackPlayer.play();
@@ -250,9 +240,9 @@ export const useCustomAudioPlayer = () => {
     await AsyncStorage.removeItem('currentTrack');
     await AsyncStorage.removeItem('trackQueue');
 
-    if (Platform.OS === 'android') {
-      await dismissAllNotificationsAsync();
-    }
+    // if (Platform.OS === 'android') {
+    //   await dismissAllNotificationsAsync();
+    // }
   };
 
   return {
