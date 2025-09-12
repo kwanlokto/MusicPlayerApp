@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -14,10 +14,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * Provider component that wraps the app and manages linked-list audio playback.
  */
 export const useCustomAudioPlayer = () => {
-  const didFinishRef = useRef<boolean>(false);
-
   const [title, setTitle] = useState<string>();
-  const [isPlaying, setIsPlaying] = useState(false); // Playback state
+  const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
 
@@ -48,8 +46,6 @@ export const useCustomAudioPlayer = () => {
 
         const queue = await TrackPlayer.getQueue();
         await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
-
-        setIsPlaying(true);
       }
     },
   );
@@ -77,6 +73,14 @@ export const useCustomAudioPlayer = () => {
           Capability.SkipToPrevious,
         ],
       });
+
+      const savedQueue = await AsyncStorage.getItem('trackQueue');
+      if (savedQueue) {
+        const tracks: Track[] = JSON.parse(savedQueue);
+        setTitle(tracks[0].title)
+        await addToQueue(tracks);
+        await TrackPlayer.skip(0);
+      }
     };
 
     setup();
@@ -100,13 +104,6 @@ export const useCustomAudioPlayer = () => {
       // Load and play new track
       await TrackPlayer.skip(index);
       await TrackPlayer.play();
-
-      didFinishRef.current = false;
-
-      // Show persistent notification on Android
-
-      // reset if playback restarted
-      didFinishRef.current = false;
     } catch (e) {
       console.error('Error playing track:', e);
     }
@@ -119,15 +116,8 @@ export const useCustomAudioPlayer = () => {
    */
   const addToQueue = async (tracks: Track[]) => {
     await TrackPlayer.reset();
-    await TrackPlayer.add(
-      tracks.map(track => {
-        return {
-          url: track.url,
-          title: track.title,
-          artist: '',
-        };
-      }),
-    );
+    await TrackPlayer.add(tracks);
+    // await AsyncStorage.setItem('trackQueue', JSON.stringify(tracks));
   };
 
   /**
