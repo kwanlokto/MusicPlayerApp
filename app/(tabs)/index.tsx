@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import React from 'react';
 
-export default function Index() {
+export default function Main() {
   const {
     position, // In seconds
     duration, // In seconds
