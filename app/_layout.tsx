@@ -6,12 +6,12 @@ import {
   ThemeProvider,
 } from '@react-navigation/native';
 import { Stack, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 import { PlaybackProvider } from '@/context/playbackContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { Linking } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 import service from '../service';
@@ -21,37 +21,38 @@ TrackPlayer.registerPlaybackService(() => service);
 
 export default function RootLayout() {
   const router = useRouter();
-
   const colorScheme = useColorScheme();
+
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [initialLinkHandled, setInitialLinkHandled] = useState(false);
 
   useEffect(() => {
-    const handleDeepLink = async (event: { url: string }) => {
-      if (event.url === 'trackplayer://notification.click') {
+    const handleDeepLink = async ({ url }: { url: string }) => {
+      if (url === 'trackplayer://notification.click') {
+        // Only navigate if not already on tabs
         router.replace('/(tabs)');
       }
+      setInitialLinkHandled(true);
     };
 
-    // Add listener and save the subscription
     const subscription = Linking.addListener('url', handleDeepLink);
 
-    // Check for initial deep link when the app launches
     (async () => {
       const initialUrl = await Linking.getInitialURL();
-      if (initialUrl === 'trackplayer://notification.click') {
+      if (initialUrl) {
         handleDeepLink({ url: initialUrl });
+      } else {
+        setInitialLinkHandled(true); // no initial URL, ready to render
       }
     })();
 
-    // Cleanup
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+    return () => subscription.remove();
+  }, [router]);
 
-  if (!loaded) return null;
+  // Wait until fonts are loaded and initial deep link is handled
+  if (!loaded || !initialLinkHandled) return null;
 
   return (
     <PlaybackProvider>
