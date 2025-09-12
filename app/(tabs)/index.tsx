@@ -62,7 +62,7 @@ export default function Index() {
               minimumTrackTintColor={Colors[scheme ?? 'dark'].progressBg}
               maximumTrackTintColor="#666"
               thumbTintColor={Colors[scheme ?? 'dark'].progressBg}
-              style={{ width: '100%', height: 40, zIndex: 999 }}
+              style={{ width: '100%', height: 50, zIndex: 999 }}
             />
             <View
               style={{

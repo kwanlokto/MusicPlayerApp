@@ -7,10 +7,16 @@ import {
 } from '@react-navigation/native';
 
 import { PlaybackProvider } from '@/context/playbackContext';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import TrackPlayer from 'react-native-track-player';
+import service from "../service";
+
+// Register the background playback service
+TrackPlayer.registerPlaybackService(() => service);
+
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
