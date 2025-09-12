@@ -52,32 +52,36 @@ export const useCustomAudioPlayer = () => {
 
   useEffect(() => {
     const setup = async () => {
-      await TrackPlayer.setupPlayer();
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback, // or StopPlayback, or PausePlayback
-        },
-        progressUpdateEventInterval: 0.1,
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-          Capability.Stop,
-        ],
-        compactCapabilities: [Capability.Play, Capability.Pause],
-        notificationCapabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.SkipToNext,
-          Capability.SkipToPrevious,
-        ],
-      });
+      try {
+        // Prevent initializing the player twice
+        await TrackPlayer.setupPlayer();
+        await TrackPlayer.updateOptions({
+          android: {
+            appKilledPlaybackBehavior:
+              AppKilledPlaybackBehavior.ContinuePlayback, // or StopPlayback, or PausePlayback
+          },
+          progressUpdateEventInterval: 0.1,
+          capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+            Capability.Stop,
+          ],
+          compactCapabilities: [Capability.Play, Capability.Pause],
+          notificationCapabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+          ],
+        });
+      } catch {}
 
       const savedQueue = await AsyncStorage.getItem('trackQueue');
       if (savedQueue) {
         const tracks: Track[] = JSON.parse(savedQueue);
-        setTitle(tracks[0].title)
+        setTitle(tracks[0].title);
         await addToQueue(tracks);
         await TrackPlayer.skip(0);
       }
