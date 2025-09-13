@@ -93,3 +93,10 @@ You only need to rebuild when a **native-related change** occurs.
 ```sh
 npx expo start
 ```
+
+---
+
+## Step 4: Production
+```sh
+eas build --platform android --profile preview
+```
