@@ -1,33 +1,48 @@
-# Welcome to your Expo app 👋
+# 🚀 Welcome to Your Expo App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) project bootstrapped with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+---
 
-# Getting Started
+## 📦 Getting Started
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+> **Note**: Before proceeding, ensure you’ve completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment).
 
-## Step 0: Getting started: Install Node AND Java Development Kit
+---
+
+## 🛠 Step 0: Install Prerequisites
+
+### Install Node.js (using `nvm`)
 ```sh
 nvm install v24.6.0
 nvm use v24.6.0
+```
 
+### Install Java Development Kit (JDK 17)
+```sh
 sudo apt update
 sudo apt install openjdk-17-jdk
 
 java -version
 javac -version
-echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
+```
+
+Add environment variables:
+```sh
+echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> ~/.bashrc
 echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc
 source ~/.bashrc
 ```
-Download and install [Android Studio](https://developer.android.com/studio)
+
+### Install Android Studio
+[Download Android Studio](https://developer.android.com/studio), then set up environment variables:
+
 ```sh
 cd ~/Downloads
 unzip android-studio-*.zip -d ~/android-studio
 ~/android-studio/android-studio/bin/studio.sh
 
-# Add env variables
+# Add environment variables
 echo "export ANDROID_HOME=$HOME/Android/Sdk" >> ~/.bashrc
 echo "export PATH=$PATH:$ANDROID_HOME/emulator" >> ~/.bashrc
 echo "export PATH=$PATH:$ANDROID_HOME/tools" >> ~/.bashrc
@@ -36,71 +51,45 @@ echo "export PATH=$PATH:$ANDROID_HOME/platform-tools" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-## Step 1: Install dependencies
-```bash
+---
+
+## 📥 Step 1: Install Dependencies
+```sh
 npm install
 ```
-## Step 2: Create development build
-```bash
+
+---
+
+## 🏗 Step 2: Create a Development Build
+```sh
 eas build --platform android --profile development
 ```
 
-You only need to rebuild when something fundamental has changed that affects the native layer or the runtime environment of your app.
+You only need to rebuild when a **native-related change** occurs.
 
-### Common Cases
+### 🔁 When to Rebuild
 
 #### 🔧 Native Code Changes
 - Added/removed/updated an **Expo config plugin**.  
-- Installed or upgraded an npm package with **native code** (e.g. `react-native-track-player`, `react-native-reanimated`).  
-- Changed your `android/` native project manually.  
-- Changed **SDK version** (Expo SDK upgrade/downgrade).  
+- Installed or upgraded a package with **native code** (e.g. `react-native-track-player`, `react-native-reanimated`).  
+- Made manual changes inside the `android/` directory.  
+- Upgraded/downgraded **Expo SDK**.  
 
 #### ⚙️ Build Profile Changes (`eas.json`)
-- Switching between profiles (e.g. `development → preview → production`).  
-- Changing flags like `developmentClient: true` (used for Expo Dev Clients).  
-- Adding **environment variables** that affect the build.  
+- Switched between profiles (e.g. `development → preview → production`).  
+- Changed flags like `developmentClient: true`.  
+- Added environment variables affecting the build.  
 
-#### 📱 Config Changes that Affect Native Build
-- Edited `app.json` / `app.config.js` values like `android.package`, `permissions`, `versionCode`, `scheme`, `intentFilters`.  
+#### 📱 Config Changes
+- Edited `app.json` / `app.config.js` (e.g. `android.package`, `permissions`, `versionCode`, `scheme`, `intentFilters`).  
 - Changed **Gradle/Kotlin/Java versions**.  
 
-#### 🆕 First Time Setup
-- When you generate the dev client for the first time (`--profile development`).  
-## Step 3: Start the app
+#### 🆕 First-Time Setup
+- When generating your dev client for the first time (`--profile development`).  
 
-```bash
+---
+
+## ▶️ Step 3: Start the App
+```sh
 npx expo start
 ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
