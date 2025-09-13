@@ -25,25 +25,34 @@ export default function FolderListScreen() {
   }, []);
 
   const requestPermissionAndLoad = async () => {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status === 'granted') loadSongs();
+    const { status } = await MediaLibrary.requestPermissionsAsync(true);
+    if (status === 'granted') {
+      loadSongs();
+    } else {
+      console.warn('Permission not granted:', status);
+    }
   };
 
   const loadSongs = async () => {
-    const albums = await MediaLibrary.getAlbumsAsync();
-    const nonEmptyAlbums = [];
-
-    for (const album of albums) {
-    const assets = await MediaLibrary.getAssetsAsync({
-      album: album.id,
+    const songs = await MediaLibrary.getAssetsAsync({
       mediaType: MediaLibrary.MediaType.audio,
-      first: 1, // we only need to know if at least one exists
     });
+    console.log('Songs:', songs.assets.length);
 
-    if (assets.assets.length > 0) {
-      nonEmptyAlbums.push(album);
+    const albums = await MediaLibrary.getAlbumsAsync();
+    console.log('Albums:', albums);
+
+    const nonEmptyAlbums = [];
+    for (const album of albums) {
+      const assets = await MediaLibrary.getAssetsAsync({
+        album: album.id,
+        mediaType: MediaLibrary.MediaType.audio,
+        first: 1,
+      });
+      if (assets.assets.length > 0) {
+        nonEmptyAlbums.push(album);
+      }
     }
-  }
 
     const uniqueFolderTitles = Array.from(
       new Set(nonEmptyAlbums.map(album => album.title)),
