@@ -40,8 +40,33 @@ source ~/.bashrc
 ```bash
 npm install
 ```
+## Step 2: Create development build
+```bash
+eas build --platform android --profile development
+```
 
-## Step 2: Start the app
+You only need to rebuild when something fundamental has changed that affects the native layer or the runtime environment of your app.
+
+### Common Cases
+
+#### 🔧 Native Code Changes
+- Added/removed/updated an **Expo config plugin**.  
+- Installed or upgraded an npm package with **native code** (e.g. `react-native-track-player`, `react-native-reanimated`).  
+- Changed your `android/` native project manually.  
+- Changed **SDK version** (Expo SDK upgrade/downgrade).  
+
+#### ⚙️ Build Profile Changes (`eas.json`)
+- Switching between profiles (e.g. `development → preview → production`).  
+- Changing flags like `developmentClient: true` (used for Expo Dev Clients).  
+- Adding **environment variables** that affect the build.  
+
+#### 📱 Config Changes that Affect Native Build
+- Edited `app.json` / `app.config.js` values like `android.package`, `permissions`, `versionCode`, `scheme`, `intentFilters`.  
+- Changed **Gradle/Kotlin/Java versions**.  
+
+#### 🆕 First Time Setup
+- When you generate the dev client for the first time (`--profile development`).  
+## Step 3: Start the app
 
 ```bash
 npx expo start
