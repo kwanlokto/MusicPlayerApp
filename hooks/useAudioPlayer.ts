@@ -10,6 +10,19 @@ import TrackPlayer, {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const fadeVolume = async (target: number, duration: number = 500) => {
+  const current = await TrackPlayer.getVolume();
+  const steps = 10;
+  const stepTime = duration / steps;
+  const diff = target - current;
+
+  for (let i = 1; i <= steps; i++) {
+    const newVolume = current + (diff * i) / steps;
+    await TrackPlayer.setVolume(newVolume);
+    await new Promise(resolve => setTimeout(resolve, stepTime));
+  }
+};
+
 /**
  * Provider component that wraps the app and manages linked-list audio playback.
  */
@@ -51,9 +64,13 @@ export const useCustomAudioPlayer = () => {
 
       if (event.type === Event.RemoteDuck) {
         if (event.paused) {
-          TrackPlayer.pause();
+          // Call interruption → fade out and pause
+          await fadeVolume(0.0, 800); // fade out in 0.8s
+          await TrackPlayer.pause();
         } else {
-          await TrackPlayer.setVolume(0.3);
+          // Ducking released → fade back in
+          await TrackPlayer.play();
+          await fadeVolume(1.0, 800); // fade in in 0.8s
         }
       }
     },
