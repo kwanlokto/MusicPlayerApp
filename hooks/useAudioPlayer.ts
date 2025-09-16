@@ -54,7 +54,7 @@ export const useCustomAudioPlayer = () => {
     const setup = async () => {
       try {
         // Prevent initializing the player twice
-        await TrackPlayer.setupPlayer();
+        await TrackPlayer.setupPlayer({ autoHandleInterruptions: true });
         await TrackPlayer.updateOptions({
           android: {
             appKilledPlaybackBehavior:
