@@ -25,6 +25,7 @@ export const useCustomAudioPlayer = () => {
       Event.PlaybackState,
       Event.PlaybackProgressUpdated,
       Event.PlaybackActiveTrackChanged,
+      Event.RemoteDuck,
     ],
     async event => {
       if (event.type === Event.PlaybackState) {
@@ -46,6 +47,12 @@ export const useCustomAudioPlayer = () => {
 
         const queue = await TrackPlayer.getQueue();
         await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
+      }
+
+      if (event.type === Event.RemoteDuck) {
+        if (event.paused) {
+          TrackPlayer.pause();
+        }
       }
     },
   );
