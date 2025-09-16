@@ -62,6 +62,7 @@ npm install
 
 ## 🏗 Step 2: Create a Development Build
 ```sh
+npx expo prebuild
 eas build --platform android --profile development
 ```
 
