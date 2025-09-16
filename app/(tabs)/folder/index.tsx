@@ -27,20 +27,14 @@ export default function FolderListScreen() {
   const requestPermissionAndLoad = async () => {
     const { status } = await MediaLibrary.requestPermissionsAsync(true);
     if (status === 'granted') {
-      loadSongs();
+      loadFolders();
     } else {
       console.warn('Permission not granted:', status);
     }
   };
 
-  const loadSongs = async () => {
-    const songs = await MediaLibrary.getAssetsAsync({
-      mediaType: MediaLibrary.MediaType.audio,
-    });
-    console.log('Songs:', songs.assets.length);
-
+  const loadFolders = async () => {
     const albums = await MediaLibrary.getAlbumsAsync();
-    console.log('Albums:', albums);
 
     const nonEmptyAlbums = [];
     for (const album of albums) {
