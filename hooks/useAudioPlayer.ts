@@ -52,6 +52,8 @@ export const useCustomAudioPlayer = () => {
       if (event.type === Event.RemoteDuck) {
         if (event.paused) {
           TrackPlayer.pause();
+        } else {
+          await TrackPlayer.setVolume(0.3);
         }
       }
     },
