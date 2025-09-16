@@ -98,5 +98,6 @@ npx expo start
 
 ## Step 4: Production
 ```sh
+npx expo prebuild
 eas build --platform android --profile preview
 ```
