@@ -16,6 +16,7 @@ This is an [Expo](https://expo.dev) project bootstrapped with [`create-expo-app`
 ```sh
 nvm install v24.6.0
 nvm use v24.6.0
+npm install -g eas-cli
 ```
 
 ### Install Java Development Kit (JDK 17)
