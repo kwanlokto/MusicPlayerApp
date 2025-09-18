@@ -39,7 +39,7 @@ export default function QueuePage() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
         Queue
       </Text>
@@ -51,10 +51,10 @@ export default function QueuePage() {
             style={styles.row}
             onPress={() => handlePlayTrack(index)}
           >
-            <Text numberOfLines={1} style={styles.title}>
+            <Text numberOfLines={1} style={styles.songTitle}>
               {item.title || 'Untitled'}
             </Text>
-            <Text style={styles.subtext}>
+            <Text style={styles.songArtist}>
               {item.artist || 'Unknown Artist'}
             </Text>
           </TouchableOpacity>
@@ -65,16 +65,28 @@ export default function QueuePage() {
 }
 const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors[scheme].background,
+      paddingTop: 65,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
+      marginBottom: 16,
+      paddingHorizontal: 20,
+      color: Colors[scheme].text,
+    },
     row: {
       paddingVertical: 8,
       paddingHorizontal: 20,
     },
-    title: {
+    songTitle: {
       fontSize: 16,
       fontWeight: '500',
       color: Colors[scheme].text,
     },
-    subtext: {
+    songArtist: {
       fontSize: 13,
       color: Colors[scheme].subText,
       marginTop: 2,
