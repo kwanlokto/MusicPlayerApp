@@ -44,6 +44,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="queue"
+        options={{
+          title: 'Queue',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="music.note.list" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
