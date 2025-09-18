@@ -1,20 +1,20 @@
 import * as MediaLibrary from 'expo-media-library';
 
 import { Colors, primaryButton } from '@/constants/Colors';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 
-import { formatDuration } from '@/helpers';
+import { CustomFlatList } from '@/components/CustomFlatList';
 import { usePlayback } from '@/context/playbackContext';
+import { formatDuration } from '@/helpers';
 
 export default function FolderPage() {
   const { folder_id } = useLocalSearchParams();
@@ -146,10 +146,9 @@ export default function FolderPage() {
           </View>
 
           {/* Song list */}
-          <FlatList
+          <CustomFlatList
             data={songs}
             keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContent}
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 onPress={() => __playTrack(index)}
@@ -165,7 +164,6 @@ export default function FolderPage() {
                 </View>
               </TouchableOpacity>
             )}
-            ItemSeparatorComponent={() => <View style={styles.divider} />}
           />
         </>
       )}
@@ -231,10 +229,5 @@ const getStyles = (scheme: 'light' | 'dark') =>
       fontSize: 13,
       color: Colors[scheme].subText,
       marginTop: 2,
-    },
-    divider: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: scheme === 'dark' ? '#2A2A2A' : '#E5E5E5',
-      marginLeft: 20, // aligns under text, not icons
     },
   });

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
+import { CustomFlatList } from '@/components/CustomFlatList';
 import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
@@ -32,18 +33,11 @@ export default function QueuePage() {
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
         Queue
       </Text>
-      <FlatList
+      <CustomFlatList
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item, index }) => (
-          <TouchableOpacity
-            onPress={() => handlePlayTrack(index)}
-            style={{
-              padding: 12,
-              borderBottomWidth: 1,
-              borderBottomColor: '#ddd',
-            }}
-          >
+          <TouchableOpacity onPress={() => handlePlayTrack(index)}>
             <Text style={{ fontSize: 16 }}>{item.title || 'Untitled'}</Text>
             <Text style={{ fontSize: 14, color: '#666' }}>
               {item.artist || 'Unknown Artist'}

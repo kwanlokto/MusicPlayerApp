@@ -2,14 +2,14 @@ import * as MediaLibrary from 'expo-media-library';
 
 import { useEffect, useState } from 'react';
 import {
-  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
 
+import { CustomFlatList } from '@/components/CustomFlatList';
 import { Colors } from '@/constants/Colors';
 import { capitalize } from '@/helpers';
 import { useRouter } from 'expo-router';
@@ -58,7 +58,7 @@ export default function FolderListScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Music folders</Text>
-      <FlatList
+      <CustomFlatList
         data={folders}
         keyExtractor={item => item}
         renderItem={({ item }) => (
@@ -71,7 +71,6 @@ export default function FolderListScreen() {
             </Text>
           </TouchableOpacity>
         )}
-        ItemSeparatorComponent={() => <View style={styles.divider} />}
       />
     </View>
   );
@@ -99,10 +98,5 @@ const getStyles = (scheme: 'light' | 'dark') =>
       fontSize: 16,
       fontWeight: '500',
       color: Colors[scheme].text,
-    },
-    divider: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: Colors[scheme].border,
-      marginLeft: 20, // aligns divider with text
     },
   });
