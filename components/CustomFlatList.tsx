@@ -5,6 +5,7 @@ import {
     Text,
     View,
     ViewStyle,
+    useColorScheme,
 } from 'react-native';
 
 // StyledFlatList.tsx
@@ -23,6 +24,9 @@ export function CustomFlatList<ItemT>({
   containerStyle,
   ...props
 }: CustomFlatListProps<ItemT>) {
+  const scheme = useColorScheme();
+  const styles = getStyles(scheme ?? 'dark');
+
   return (
     <FlatList
       {...props}
@@ -37,37 +41,37 @@ export function CustomFlatList<ItemT>({
           <Text style={styles.emptyText}>{emptyMessage}</Text>
         </View>
       }
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      ItemSeparatorComponent={() => <View style={styles.divider} />}
       showsVerticalScrollIndicator={false}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginVertical: 6,
-  },
-  emptyWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  emptyContainer: {
-    flexGrow: 1, // Center empty state
-    justifyContent: 'center',
-  },
-});
+const getStyles = (scheme: 'light' | 'dark') =>
+  StyleSheet.create({
+    list: {
+      flex: 1,
+    },
+    contentContainer: {
+      paddingVertical: 8,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: scheme === 'dark' ? '#2A2A2A' : '#E5E5E5',
+      marginLeft: 20, // aligns under text, not icons
+    },
+    emptyWrapper: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 40,
+    },
+    emptyText: {
+      fontSize: 16,
+      color: '#999',
+    },
+    emptyContainer: {
+      flexGrow: 1, // Center empty state
+      justifyContent: 'center',
+    },
+  });
