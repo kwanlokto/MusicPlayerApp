@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useColorScheme,
+} from 'react-native';
 
 import { CustomFlatList } from '@/components/CustomFlatList';
+import { Colors } from '@/constants/Colors';
 import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
   const { getQueue, playNext } = useCustomAudioPlayer();
   const [queue, setQueue] = useState<Track[]>();
+
+  const scheme = useColorScheme();
+  const styles = getStyles(scheme ?? 'dark');
 
   // Fetch queue on mount
   useEffect(() => {
@@ -29,7 +39,7 @@ export default function QueuePage() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <View style={{ flex: 1 }}>
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
         Queue
       </Text>
@@ -37,9 +47,14 @@ export default function QueuePage() {
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item, index }) => (
-          <TouchableOpacity onPress={() => handlePlayTrack(index)}>
-            <Text style={{ fontSize: 16 }}>{item.title || 'Untitled'}</Text>
-            <Text style={{ fontSize: 14, color: '#666' }}>
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => handlePlayTrack(index)}
+          >
+            <Text numberOfLines={1} style={styles.title}>
+              {item.title || 'Untitled'}
+            </Text>
+            <Text style={styles.subtext}>
               {item.artist || 'Unknown Artist'}
             </Text>
           </TouchableOpacity>
@@ -48,3 +63,20 @@ export default function QueuePage() {
     </View>
   );
 }
+const getStyles = (scheme: 'light' | 'dark') =>
+  StyleSheet.create({
+    row: {
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: Colors[scheme].text,
+    },
+    subtext: {
+      fontSize: 13,
+      color: Colors[scheme].subText,
+      marginTop: 2,
+    },
+  });
