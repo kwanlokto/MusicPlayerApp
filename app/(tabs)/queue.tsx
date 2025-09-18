@@ -40,7 +40,7 @@ export default function QueuePage() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
+      <Text style={styles.title}>
         Queue
       </Text>
       <CustomFlatList

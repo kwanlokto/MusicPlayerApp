@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme
+  useColorScheme,
 } from 'react-native';
 
 import { CustomFlatList } from '@/components/CustomFlatList';
@@ -34,25 +34,31 @@ export default function FolderListScreen() {
   };
 
   const loadFolders = async () => {
-    const albums = await MediaLibrary.getAlbumsAsync();
-
-    const nonEmptyAlbums = [];
-    for (const album of albums) {
-      const assets = await MediaLibrary.getAssetsAsync({
-        album: album.id,
+    try {
+      // Get all audio assets (can paginate if needed)
+      const media = await MediaLibrary.getAssetsAsync({
         mediaType: MediaLibrary.MediaType.audio,
-        first: 1,
+        first: 1000,
       });
-      if (assets.assets.length > 0) {
-        nonEmptyAlbums.push(album);
-      }
+
+      const musicAssets = media.assets.filter(asset =>
+        asset.uri.toLowerCase().includes('/music/'),
+      );
+
+      // Map assets to their immediate parent folder
+      const folderMap: Record<string, string> = {};
+      musicAssets.forEach(asset => {
+        const parts = asset.uri.split('/');
+        // -2 gives parent folder name, -1 is file name
+        const folderName = parts[parts.length - 2];
+        const folderPath = parts.slice(0, parts.length - 1).join('/');
+        folderMap[folderPath] = folderName;
+      });
+
+      setFolders(Object.values(folderMap));
+    } catch (err) {
+      console.log('Error loading music folders:', err);
     }
-
-    const uniqueFolderTitles = Array.from(
-      new Set(nonEmptyAlbums.map(album => album.title)),
-    ).sort((a, b) => a.localeCompare(b));
-
-    setFolders(uniqueFolderTitles);
   };
 
   return (
