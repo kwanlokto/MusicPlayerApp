@@ -13,7 +13,7 @@ import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
-  const { getQueue, playNext } = useCustomAudioPlayer();
+  const { getQueue, playTrack } = useCustomAudioPlayer();
   const [queue, setQueue] = useState<Track[]>();
 
   const scheme = useColorScheme();
@@ -35,7 +35,7 @@ export default function QueuePage() {
 
   // Optionally, function to jump to a track in the queue
   const handlePlayTrack = async (index: number) => {
-    await playNext();
+    await playTrack(index);
   };
 
   return (
