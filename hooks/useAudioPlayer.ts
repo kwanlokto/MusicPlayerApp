@@ -191,6 +191,14 @@ export const useCustomAudioPlayer = () => {
     await AsyncStorage.removeItem('trackQueue');
   };
 
+  const getQueue = async () => {
+    try {
+      return await TrackPlayer.getQueue();
+    } catch (err) {
+      console.log('Error fetching queue:', err);
+    }
+  };
+
   return {
     title,
     isPlaying,
@@ -203,5 +211,6 @@ export const useCustomAudioPlayer = () => {
     handleSlidingComplete,
     togglePlay,
     stopTrack,
+    getQueue,
   };
 };
