@@ -4,7 +4,7 @@ import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
-const QueueScreen = () => {
+export default function QueuePage() {
   const { getQueue, playNext } = useCustomAudioPlayer();
   const [queue, setQueue] = useState<Track[]>();
 
@@ -53,6 +53,4 @@ const QueueScreen = () => {
       />
     </View>
   );
-};
-
-export default QueueScreen;
+}
