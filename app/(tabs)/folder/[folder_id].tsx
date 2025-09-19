@@ -152,7 +152,7 @@ export default function FolderPage() {
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 onPress={() => __playTrack(index)}
-                style={styles.songRow}
+                style={styles.row}
               >
                 <View style={styles.songInfo}>
                   <Text numberOfLines={1} style={styles.songTitle}>
@@ -211,7 +211,7 @@ const getStyles = (scheme: 'light' | 'dark') =>
     listContent: {
       paddingVertical: 8,
     },
-    songRow: {
+    row: {
       paddingVertical: 14,
       paddingHorizontal: 20,
       flexDirection: 'row',
