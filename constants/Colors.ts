@@ -1,3 +1,5 @@
+import { TextStyle } from "react-native";
+
 /**
  * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
@@ -76,11 +78,17 @@ export const primaryButton: Record<'light' | 'dark', ButtonStyle> = {
   },
 };
 
-const shadow = {
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowRadius: 6,
-  elevation: 5,
+const songTitle: Record<'light' | 'dark', TextStyle> = {
+  light: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors['light'].text,
+  },
+  dark: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors['dark'].text,
+  },
 };
 
 const center = {
