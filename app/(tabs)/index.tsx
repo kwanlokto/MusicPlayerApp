@@ -56,9 +56,7 @@ export default function Main() {
               minimumValue={0}
               maximumValue={duration}
               value={position}
-              onSlidingComplete={(value: number) => {
-                handleSlidingComplete(value);
-              }}
+              onSlidingComplete={handleSlidingComplete}
               minimumTrackTintColor={Colors[scheme ?? 'dark'].progressBg}
               maximumTrackTintColor="#666"
               thumbTintColor={Colors[scheme ?? 'dark'].progressBg}
