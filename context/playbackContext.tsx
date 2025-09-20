@@ -33,12 +33,12 @@ type PlaybackContextType = {
   addToQueue: (tracks: Track[]) => Promise<void>;
 
   /** Plays the next track in the linked list. Stops if at the end. */
-  playNext: () => void;
+  playNext: () => Promise<void>;
 
   /** Plays the previous track in the linked list, if available. */
-  playPrevious: () => void;
+  playPrevious: () => Promise<void>;
 
-  handleSlidingComplete: (value: number) => void;
+  handleSlidingComplete: (value: number) => Promise<void>;
 
   /** Toggles play/pause of the current track. */
   togglePlay: () => Promise<void>;
