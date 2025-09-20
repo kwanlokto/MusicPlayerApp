@@ -21,6 +21,10 @@ export default function QueuePage() {
 
   // Fetch queue on mount
   useEffect(() => {
+    /**
+     * TODO: This will need an observable to properly update whenever
+     * the queue updates!
+     */
     const fetchQueue = async () => {
       try {
         const localQueue = await getQueue();
