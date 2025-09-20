@@ -13,7 +13,7 @@ import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
-  const { title, getQueue, playTrack } = useCustomAudioPlayer();
+  const { title, isPlaying, getQueue, playTrack } = useCustomAudioPlayer();
   const [queue, setQueue] = useState<Track[]>();
 
   const scheme = useColorScheme();
@@ -45,18 +45,18 @@ export default function QueuePage() {
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item, index }) => {
-          const isPlaying = item.title === title;
+          const isSongPlaying = item.title === title && isPlaying
 
           return (
             <TouchableOpacity
               style={[
                 styles.row,
-                isPlaying && { backgroundColor: '#1e1e1e' }, // highlight row
+                isSongPlaying && { backgroundColor: '#1e1e1e' }, // highlight row
               ]}
               onPress={() => handlePlayTrack(index)}
             >
               <Text numberOfLines={1} style={[styles.songTitle]}>
-                {isPlaying ? '[ Now Playing ... ]    ' : ''}
+                {isSongPlaying ? '[ Now Playing ]    ' : ''}
                 {item.title || 'Untitled'}
               </Text>
               <Text style={[styles.songArtist]}>
