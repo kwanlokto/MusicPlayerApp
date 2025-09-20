@@ -9,8 +9,8 @@ import {
 
 import { CustomFlatList } from '@/components/CustomFlatList';
 import { Colors } from '@/constants/Colors';
-import { Track } from 'react-native-track-player';
 import { usePlayback } from '@/context/playbackContext';
+import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
   const { title, isPlaying, getQueue, playTrack } = usePlayback();
@@ -23,8 +23,8 @@ export default function QueuePage() {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const q = await getQueue();
-        setQueue(q);
+        const localQueue = await getQueue();
+        setQueue(localQueue);
       } catch (err) {
         console.log('Error fetching queue:', err);
       }
