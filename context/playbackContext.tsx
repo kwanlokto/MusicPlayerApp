@@ -30,7 +30,7 @@ type PlaybackContextType = {
    * If the list is empty, the first track becomes the head node.
    * @param tracks Array of Track objects to enqueue
    */
-  addToQueue: (tracks: Track[]) => void;
+  addToQueue: (tracks: Track[]) => Promise<void>;
 
   /** Plays the next track in the linked list. Stops if at the end. */
   playNext: () => void;
@@ -46,7 +46,7 @@ type PlaybackContextType = {
   /** Stops playback completely and clears the linked list. */
   stopTrack: () => Promise<void>;
 
-  getQueue: () => Promise<Track[] | undefined>
+  getQueue: () => Promise<Track[] | undefined>;
 };
 
 /**

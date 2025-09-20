@@ -44,7 +44,7 @@ export default function FolderPage() {
   }, []);
 
   // Play all songs in order
-  const __playTrack = (index: number) => {
+  const __playTrack = async (index: number) => {
     if (!songs.length) return;
 
     // Create a queue of track URIs and titles
@@ -54,13 +54,13 @@ export default function FolderPage() {
     }));
 
     // Send queue to playback context
-    addToQueue(tracks);
+    await addToQueue(tracks);
     // Start playing the first track
-    playTrack(index);
+    await playTrack(index);
   };
 
   // Shuffle all songs and play the first song
-  const shuffleAll = () => {
+  const shuffleAll = async () => {
     if (!songs.length) return;
 
     // Create a shallow copy of the queue
@@ -80,10 +80,10 @@ export default function FolderPage() {
       title: song.filename,
     }));
     // Update queue in context
-    addToQueue(tracks);
+    await addToQueue(tracks);
 
     // Start playback from the first track
-    playTrack(0);
+    await playTrack(0);
   };
 
   return (
