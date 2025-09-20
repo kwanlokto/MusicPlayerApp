@@ -51,7 +51,7 @@ export default function QueuePage() {
             <TouchableOpacity
               style={[
                 styles.row,
-                isSongPlaying && { backgroundColor: '#1e1e1e' }, // highlight row
+                isSongPlaying && { backgroundColor: '#2c2c2c' }, // highlight row
               ]}
               onPress={() => handlePlayTrack(index)}
             >
