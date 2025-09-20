@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 
-import { Track } from 'react-native-track-player';
 import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
+import { Track } from 'react-native-track-player';
 
 /**
  * Defines the shape of the PlaybackContext.
@@ -45,6 +45,8 @@ type PlaybackContextType = {
 
   /** Stops playback completely and clears the linked list. */
   stopTrack: () => Promise<void>;
+
+  getQueue: () => Promise<Track[] | undefined>
 };
 
 /**
@@ -72,6 +74,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     handleSlidingComplete,
     togglePlay,
     stopTrack,
+    getQueue,
   } = useCustomAudioPlayer();
 
   return (
@@ -88,6 +91,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSlidingComplete,
         togglePlay,
         stopTrack,
+        getQueue,
       }}
     >
       {children}

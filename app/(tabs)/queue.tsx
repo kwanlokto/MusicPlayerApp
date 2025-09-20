@@ -9,11 +9,11 @@ import {
 
 import { CustomFlatList } from '@/components/CustomFlatList';
 import { Colors } from '@/constants/Colors';
-import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
+import { usePlayback } from '@/context/playbackContext';
 
 export default function QueuePage() {
-  const { title, isPlaying, getQueue, playTrack } = useCustomAudioPlayer();
+  const { title, isPlaying, getQueue, playTrack } = usePlayback();
   const [queue, setQueue] = useState<Track[]>();
 
   const scheme = useColorScheme();
