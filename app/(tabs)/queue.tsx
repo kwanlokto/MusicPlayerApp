@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useColorScheme,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
 } from 'react-native';
 
 import { CustomFlatList } from '@/components/CustomFlatList';
@@ -13,7 +13,7 @@ import { useCustomAudioPlayer } from '@/hooks/useAudioPlayer';
 import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
-  const { getQueue, playTrack } = useCustomAudioPlayer();
+  const { title, getQueue, playTrack } = useCustomAudioPlayer();
   const [queue, setQueue] = useState<Track[]>();
 
   const scheme = useColorScheme();
@@ -40,25 +40,31 @@ export default function QueuePage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        Queue
-      </Text>
+      <Text style={styles.title}>Queue</Text>
       <CustomFlatList
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() => handlePlayTrack(index)}
-          >
-            <Text numberOfLines={1} style={styles.songTitle}>
-              {item.title || 'Untitled'}
-            </Text>
-            <Text style={styles.songArtist}>
-              {item.artist || 'Unknown Artist'}
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item, index }) => {
+          const isPlaying = item.title === title;
+
+          return (
+            <TouchableOpacity
+              style={[
+                styles.row,
+                isPlaying && { backgroundColor: '#1e1e1e' }, // highlight row
+              ]}
+              onPress={() => handlePlayTrack(index)}
+            >
+              <Text numberOfLines={1} style={[styles.songTitle]}>
+                {isPlaying ? '[ Now Playing ... ]    ' : ''}
+                {item.title || 'Untitled'}
+              </Text>
+              <Text style={[styles.songArtist]}>
+                {item.artist || 'Unknown Artist'}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
