@@ -31,7 +31,7 @@ export const useCustomAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
-  const [queue, setQueue] = useState<Track[]>([])
+  const [queue, setQueue] = useState<Track[]>([]);
 
   // --- TrackPlayer event listeners ---
   useTrackPlayerEvents(
@@ -40,6 +40,7 @@ export const useCustomAudioPlayer = () => {
       Event.PlaybackProgressUpdated,
       Event.PlaybackActiveTrackChanged,
       Event.RemoteDuck,
+      Event.PlaybackQueueEnded,
     ],
     async event => {
       if (event.type === Event.PlaybackState) {
@@ -72,6 +73,15 @@ export const useCustomAudioPlayer = () => {
           // Ducking released → fade back in
           await TrackPlayer.play();
           await fadeVolume(1.0, 800); // fade in in 0.8s
+        }
+      }
+
+      if (event.type === Event.PlaybackQueueEnded) {
+        // Start from first track in queue
+        const queue = await TrackPlayer.getQueue();
+        if (queue.length > 0) {
+          await TrackPlayer.skip(0);
+          await TrackPlayer.play();
         }
       }
     },
@@ -148,7 +158,7 @@ export const useCustomAudioPlayer = () => {
   const addToQueue = async (tracks: Track[]) => {
     await TrackPlayer.reset();
     await TrackPlayer.add(tracks);
-    setQueue(tracks)
+    setQueue(tracks);
     // await AsyncStorage.setItem('trackQueue', JSON.stringify(tracks));
   };
 
