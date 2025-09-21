@@ -9,7 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme
+  useColorScheme,
 } from 'react-native';
 
 import { CustomFlatList } from '@/components/CustomFlatList';
@@ -24,22 +24,21 @@ export default function FolderPage() {
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
 
-  const loadSongs = async () => {
-    const media = await MediaLibrary.getAssetsAsync({
-      mediaType: MediaLibrary.MediaType.audio,
-      first: 1000, // capped to 1000 songs per folder
-    });
-
-    const songsInFolder = media.assets.filter(asset => {
-      if (!asset.uri.startsWith('file://')) return false;
-      const path = asset.uri.split('/').slice(-2, -1)[0];
-      return path === folder_id;
-    });
-
-    setSongs(songsInFolder);
-  };
-
   useEffect(() => {
+    const loadSongs = async () => {
+      const media = await MediaLibrary.getAssetsAsync({
+        mediaType: MediaLibrary.MediaType.audio,
+        first: 1000, // capped to 1000 songs per folder
+      });
+
+      const songsInFolder = media.assets.filter(asset => {
+        if (!asset.uri.startsWith('file://')) return false;
+        const path = asset.uri.split('/').slice(-2, -1)[0];
+        return path === folder_id;
+      });
+
+      setSongs(songsInFolder);
+    };
     loadSongs();
   }, []);
 

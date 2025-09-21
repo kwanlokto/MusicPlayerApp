@@ -21,17 +21,16 @@ export default function FolderListScreen() {
   const styles = getStyles(scheme ?? 'dark');
 
   useEffect(() => {
+    const requestPermissionAndLoad = async () => {
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
+      if (status === 'granted') {
+        loadFolders();
+      } else {
+        console.warn('Permission not granted:', status);
+      }
+    };
     requestPermissionAndLoad();
   }, []);
-
-  const requestPermissionAndLoad = async () => {
-    const { status } = await MediaLibrary.requestPermissionsAsync(true);
-    if (status === 'granted') {
-      loadFolders();
-    } else {
-      console.warn('Permission not granted:', status);
-    }
-  };
 
   const loadFolders = async () => {
     try {
