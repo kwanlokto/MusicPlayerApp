@@ -25,7 +25,7 @@ export default function QueuePage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Queue</Text>
+      <Text style={styles.title}>Playback Queue</Text>
       <CustomFlatList
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
