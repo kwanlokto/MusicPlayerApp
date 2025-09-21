@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,33 +10,13 @@ import {
 import { CustomFlatList } from '@/components/CustomFlatList';
 import { Colors } from '@/constants/Colors';
 import { usePlayback } from '@/context/playbackContext';
-import { Track } from 'react-native-track-player';
 
 export default function QueuePage() {
-  const { title, isPlaying, getQueue, playTrack } = usePlayback();
-  const [queue, setQueue] = useState<Track[]>();
+  const { title, isPlaying, queue, playTrack } = usePlayback();
 
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
 
-  // Fetch queue on mount
-  useEffect(() => {
-    /**
-     * TODO: This will need an observable to properly update whenever
-     * the queue updates!
-     * TODO: It looks like the queue doesn't loop
-     */
-    const fetchQueue = async () => {
-      try {
-        const localQueue = await getQueue();
-        setQueue(localQueue);
-      } catch (err) {
-        console.log('Error fetching queue:', err);
-      }
-    };
-
-    fetchQueue();
-  }, []);
 
   // Optionally, function to jump to a track in the queue
   const handlePlayTrack = async (index: number) => {

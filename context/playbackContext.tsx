@@ -46,7 +46,7 @@ type PlaybackContextType = {
   /** Stops playback completely and clears the linked list. */
   stopTrack: () => Promise<void>;
 
-  getQueue: () => Promise<Track[] | undefined>;
+  queue: Track[] | undefined;
 };
 
 /**
@@ -67,6 +67,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     position,
     duration,
     title,
+    queue,
     playTrack,
     addToQueue,
     playNext,
@@ -74,7 +75,6 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     handleSlidingComplete,
     togglePlay,
     stopTrack,
-    getQueue,
   } = useCustomAudioPlayer();
 
   return (
@@ -84,6 +84,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         position,
         duration,
         title,
+        queue,
         playTrack,
         addToQueue,
         playNext,
@@ -91,7 +92,6 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSlidingComplete,
         togglePlay,
         stopTrack,
-        getQueue,
       }}
     >
       {children}

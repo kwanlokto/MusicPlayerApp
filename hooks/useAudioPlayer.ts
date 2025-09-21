@@ -31,6 +31,7 @@ export const useCustomAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
+  const [queue, setQueue] = useState<Track[]>([])
 
   // --- TrackPlayer event listeners ---
   useTrackPlayerEvents(
@@ -147,6 +148,7 @@ export const useCustomAudioPlayer = () => {
   const addToQueue = async (tracks: Track[]) => {
     await TrackPlayer.reset();
     await TrackPlayer.add(tracks);
+    setQueue(tracks)
     // await AsyncStorage.setItem('trackQueue', JSON.stringify(tracks));
   };
 
@@ -191,19 +193,12 @@ export const useCustomAudioPlayer = () => {
     await AsyncStorage.removeItem('trackQueue');
   };
 
-  const getQueue = async () => {
-    try {
-      return await TrackPlayer.getQueue();
-    } catch (err) {
-      console.log('Error fetching queue:', err);
-    }
-  };
-
   return {
     title,
     isPlaying,
     position,
     duration,
+    queue,
     playTrack,
     addToQueue,
     playNext,
@@ -211,6 +206,5 @@ export const useCustomAudioPlayer = () => {
     handleSlidingComplete,
     togglePlay,
     stopTrack,
-    getQueue,
   };
 };
