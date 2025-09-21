@@ -46,6 +46,7 @@ export default function FolderPage() {
   const playSelectedTrack = async (index: number) => {
     if (!songs.length) return;
 
+    // TODO: This recreates the queue even tho the queue is the same just the index is diff
     // Create a queue of track URIs and titles
     const tracks = songs.map(song => ({
       url: song.uri,
