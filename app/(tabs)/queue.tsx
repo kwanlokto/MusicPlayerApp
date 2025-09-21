@@ -24,6 +24,7 @@ export default function QueuePage() {
     /**
      * TODO: This will need an observable to properly update whenever
      * the queue updates!
+     * TODO: It looks like the queue doesn't loop
      */
     const fetchQueue = async () => {
       try {
