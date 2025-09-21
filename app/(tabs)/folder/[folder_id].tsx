@@ -43,7 +43,7 @@ export default function FolderPage() {
   }, [folder_id]);
 
   // Play all songs in order
-  const __playTrack = async (index: number) => {
+  const playSelectedTrack = async (index: number) => {
     if (!songs.length) return;
 
     // Create a queue of track URIs and titles
@@ -99,7 +99,7 @@ export default function FolderPage() {
           <View style={styles.playControls}>
             <TouchableOpacity
               style={[styles.actionButton, primaryButton[scheme ?? 'dark']]}
-              onPress={() => __playTrack(0)}
+              onPress={() => playSelectedTrack(0)}
             >
               <Ionicons
                 name="play-circle"
@@ -150,7 +150,7 @@ export default function FolderPage() {
             keyExtractor={item => item.id}
             renderItem={({ item, index }) => (
               <TouchableOpacity
-                onPress={() => __playTrack(index)}
+                onPress={() => playSelectedTrack(index)}
                 style={styles.row}
               >
                 <View style={styles.songInfo}>
