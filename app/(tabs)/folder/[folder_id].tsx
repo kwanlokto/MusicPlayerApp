@@ -40,7 +40,7 @@ export default function FolderPage() {
       setSongs(songsInFolder);
     };
     loadSongs();
-  }, []);
+  }, [folder_id]);
 
   // Play all songs in order
   const __playTrack = async (index: number) => {
