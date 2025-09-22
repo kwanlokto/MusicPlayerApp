@@ -81,6 +81,7 @@ export default function FolderListScreen() {
   );
 }
 
+// TODO: create global styles
 const getStyles = (scheme: 'light' | 'dark') =>
   StyleSheet.create({
     container: {
