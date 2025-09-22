@@ -57,8 +57,12 @@ export const useCustomAudioPlayer = () => {
         event.index != null
       ) {
         const track = await TrackPlayer.getTrack(event.index);
-        const { title } = track || {};
-        setTitle(title);
+        if (typeof track !== 'undefined') {
+          const { title } = track;
+          setTitle(title);
+        } else {
+          setTitle("")
+        }
 
         const queue = await TrackPlayer.getQueue();
         await AsyncStorage.setItem('trackQueue', JSON.stringify(queue));
