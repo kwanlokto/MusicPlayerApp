@@ -98,7 +98,7 @@ npx expo start
 
 ---
 
-## Step 4: Production
+## Step 4: Production (Build an APK)
 ```sh
 npx expo prebuild
 eas build --platform android --profile preview
