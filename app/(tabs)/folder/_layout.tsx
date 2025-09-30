@@ -16,10 +16,12 @@ export default function FolderStackLayout() {
     if (status !== 'granted') {
       console.warn('Notifications permission not granted!');
     }
-  }
+  };
+
   useEffect(() => {
-    requestPermissions()
-  }, [])
+    requestPermissions();
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <Stack>
