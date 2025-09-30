@@ -7,7 +7,7 @@ import { MiniPlayer } from '@/components/MiniPlayer';
 import { View } from 'react-native';
 
 export default function FolderStackLayout() {
-  const segments = useSegments();
+  const segments = useSegments() as string[];
 
   const showMiniPlayer = segments[0] === '(tabs)' && segments[1] === 'folder';
 
