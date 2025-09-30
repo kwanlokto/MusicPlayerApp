@@ -17,7 +17,6 @@ export default function QueuePage() {
   const scheme = useColorScheme();
   const styles = getStyles(scheme ?? 'dark');
 
-
   // Optionally, function to jump to a track in the queue
   const handlePlayTrack = async (index: number) => {
     await playTrack(index);
@@ -30,7 +29,7 @@ export default function QueuePage() {
         data={queue}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={({ item, index }) => {
-          const isSongPlaying = item.title === title && isPlaying
+          const isSongPlaying = item.title === title && isPlaying;
 
           return (
             <TouchableOpacity
